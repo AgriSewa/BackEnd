@@ -31,6 +31,7 @@ router.get("/file", (req, res) => {
 //Farmer Routes
 router.get('/get/nearest',farmerController.findNearestExperts);
 router.post('/uploadimg',multer.single("imgfile"),farmerController.uploadImage);
-router.post('/slots',middleware.getAuthenticatedFarmer,farmerController.findSlots);
+router.get('/slots/:expertID',middleware.getAuthenticatedFarmer,farmerController.findSlots);
+router.get('/bookslot/:date/:time/:mode/:expertID',middleware.getAuthenticatedFarmer,farmerController.bookTimeSlot);
 
 module.exports = router;
