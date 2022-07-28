@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "cellular-deck-356110",
+  "private_key_id": "90493569243986cbf6d36dd5ede12bf06b08ee54",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDKHd4YU1tlIkNL\nJxo6xvsuS7a7mfKTpbcYJU+tKa3O+Fo5bGehE8+SvL8hQPnGHqkBRAAmJfak2IhQ\nr/h5O0Brb82xpj6/Im1R+kRSmBIzzFO7QiJar8/jkVJgcUTMnj8nzFPHMwBeNDe6\nTTrd6PJ0bEW5DcFHEtY4Bb38/6jpWwVOuW5/fIVBE/YpOAMaoUpIL4QbSa0O5vSo\nV2b3nIqh1PdtOabG8oYAK1EFY6fspvDu1rXeSa4dcITU5RDaKsMEgcf+OkxI6xgf\nVPM1BlIc3sghVL0ucqhQl+ILsnviUEPy2uqx6vmgNMTP9R5HAGoTXDfYsMskfh2k\nRnz2TrVXAgMBAAECggEAGayjmslz8avhinlkHpVKMP5TLw+GPfUuBfYvYdrKhmEL\n7QF1RIPkuUoaqVm8oMsiQtPlhPMLmrMa1c0Urim1rDAem/N3QwZXhrNY3HkOzt+k\nv0POY2Cz8r9yDGg3ChsMAL024zX6VP0jGxpWYPwHWHyseq5hn+qnpaQtFydOyJ2a\nZaNUy9NEOxRqvrSnfmi7cKbJb2EIdQ3ObdeUETCjdsTWNaHb+dxZRTb1r+33jbQn\nIRITx/PrQ/eWDcHgmPbAocP5k7jn2n0JaKCT5mqThrV+4B2yYZX3FilwU3iFKzgh\nB88Bbvc3mtHIj6hp+iPW0E/uGT4NrgIeSQFEtG3kWQKBgQD0X2NkdUQB+av7rOu5\nLsRcPOzaEufVQdI9UqXyInDYzJITt79Tk4K5/OzgndXB5r2qyeA0AsOJ4l252nci\nfcxP1dU0hFmHU9LsI/8dXZRYLuhLxiEtRj+UNSRBB006lvy2vrq7sup28nI4D09a\nfTJW/dLqesMorgIpI6Xpo+2f4wKBgQDTu8aDGc84c6L2uuzNMcCk0Izc820x7cqn\nSy0bocO0zagXQ3Ox5B7bXueh+mZWlLoLxchyezDsqusfr51uGrSQgKrvjZrqrSv6\ne8A3ebPI35Igyt7b+cc+6IsD6hPecEeU9Gi3l4F2KX0x9nZL/0FkK1DUybR4q7Bw\nBkDD2xQm/QKBgQCfVoMMQZnyX8VP+NRKjr/iFKerGaCoYJ6g9X7WfrZt5hVpXeoW\nqJwYgV5Cpyd1ouoQrkjOIO82vK64PEZp6vSJKbg24gUuQ+3Ho0D4+Md9KDi3D50a\nVC+oh234KLameUSWM462TFas8DChdPoc2n00U5Ru51TQ9YTbJi9MRGLwWQKBgHbX\n0d+qL+6esVzNpLaz805PJJGsLKE2uGXYQ1RcIs4sFOoh2SGDSnKVPWxkcOauChMr\ni4v+a4KbmOerGbFAWhM1tTxKfia01pd8uHIq5GeeXZX8aMSN2XEM82JaE5bp7LPF\nz7Uk2+yn8vaFQPb9KgYAbhlRsfN9YsYuLFICeLg9AoGBAKpUUC8v0CVCi3L4SkXH\nvrK89vv9ENRaAUXvjhNZaFiG3Fb6jhrFILJWYhtMe+aFAD9Y8feyqWXb7MyZ4zSy\nC3VdjPC2LWQo7pB9UcQHQmxAqkCdtwHltBPMXEchnhWjqd0cIVQU1GQBy0cYX023\nmJCYcLt0SImfNBJOxlIh/jOd\n-----END PRIVATE KEY-----\n",
+  "client_email": "agrisewa@cellular-deck-356110.iam.gserviceaccount.com",
+  "client_id": "110132327781364753010",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/agrisewa%40cellular-deck-356110.iam.gserviceaccount.com"
+}

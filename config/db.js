@@ -1,5 +1,22 @@
 const mongoose=require('mongoose');
+var mysql = require('mysql2');
 
-const db=process.env.MONGO_URI;
+var con = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "12345678",
+  database:"agrisewa"
+});
 
-mongoose.connect(db).then(()=>console.log("DB Connected!")).catch((err)=>console.log(err));
+con.connect(function(err) {
+    if (err) throw err;
+    console.log("MySQL Connected!");
+});
+
+const uri=process.env.MONGO_URI;
+
+mongoose.connect(uri)
+.then(()=>console.log("MongoDB Connected!"))
+.catch((err)=>console.log(err));
+
+module.exports=con;

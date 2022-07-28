@@ -2,7 +2,7 @@
 const mongoose = require('mongoose')
 
 
-const UserSchema = new mongoose.Schema({
+const FarmerSchema = new mongoose.Schema({
     username:{
         type : String,
         required : [true,"Please provide a username"]
@@ -11,10 +11,10 @@ const UserSchema = new mongoose.Schema({
     phone: {
         type : String,
         required : [true,"Please provide a phone no."],
+        unique: [true,"Number already registered"]
     },
-    address: {
-        type : String,
-        required : true,
+    location:{
+        type:Object
     },
     verified : {
         type : Boolean,
@@ -23,5 +23,5 @@ const UserSchema = new mongoose.Schema({
 
 })
 
-const User  = mongoose.model("User",UserSchema)
-module.exports = User
+const Farmer  = mongoose.model("Farmer",FarmerSchema)
+module.exports = Farmer;
