@@ -1,4 +1,5 @@
 const Farmer = require('../models/Farmer')
+const Expert = require('../models/Expert')
 const config = require('../config/config')
 const client = require("twilio")(config.accountSID, config.authToken);
 const jwt=require("jsonwebtoken");
@@ -61,7 +62,7 @@ exports.verifyRegister = async(req, res, next)=>{
     }
 }
 
-exports.login = async(req, res, next) =>{
+exports.loginFarmer = async(req, res, next) =>{
     const {phone} = req.body
     try{
         const farmer = await Farmer.find({phone:phone});
@@ -84,7 +85,7 @@ exports.login = async(req, res, next) =>{
     } 
 }
 
-exports.verifyLogin = async(req, res, next)=>{
+exports.verifyLoginFarmer = async(req, res, next)=>{
     const {phone} = req.params;
     const farmer = await Farmer.findOne({phone})
 
@@ -95,15 +96,60 @@ exports.verifyLogin = async(req, res, next)=>{
             code : req.body.code
         })
         .then((data)=>{
-            console.log(data.valid)
             if(data.valid===false){
                 res.send("Invalid OTP");
             }
             else{
                 const token=jwt.sign({_id:farmer._id},JWT_SECRET)
-                farmer.verified = true;
                 res.status(200).send(token);
-                farmer.save();
+            }
+        })
+    }
+    catch(error){
+        next(error)
+    }
+}
+
+exports.loginExpert = async(req, res, next) =>{
+    const {phone} = req.body
+    try{
+        const expert = await Expert.find({phone:phone});
+        let ph = parseInt("91"+expert.phone);
+ 
+        //console.log(config.serviceID)
+        await client.verify.services(config.serviceId)
+        .verifications
+        .create({
+            to : `+91${req.body.phone}`,
+            channel : "sms"
+        })
+        .then((data)=>{
+            res.status(200).send("Success")
+        })
+        
+    }
+    catch(error){
+        next(error)
+    } 
+}
+
+exports.verifyLoginExpert = async(req, res, next)=>{
+    const {phone} = req.params;
+    const expert = await Expert.findOne({phone})
+
+    try{
+        await client.verify.services(config.serviceId)
+        .verificationChecks.create({
+            to : `+91${req.params.phone}`,
+            code : req.body.code
+        })
+        .then((data)=>{
+            if(data.valid===false){
+                res.send("Invalid OTP");
+            }
+            else{
+                const token=jwt.sign({_id:expert._id},JWT_SECRET)
+                res.status(200).send(token);
             }
         })
     }
