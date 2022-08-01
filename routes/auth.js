@@ -17,6 +17,8 @@ router.route("/register").post(register);
 router.route("/verifyRegister/:phone").post(verifyRegister);
 router.post("/login",loginFarmer);
 router.post("/verifyLogin/:phone",verifyLoginFarmer);
+
+//Expert Routes
 router.post("/loginExpert",loginExpert);
 router.post("/verifyLoginExpert/:phone",verifyLoginExpert);
 

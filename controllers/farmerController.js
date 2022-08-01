@@ -6,6 +6,7 @@ const axios=require('axios').default;
 const Expert=require("../models/Expert");
 const con=require("../config/db");
 const adminController = require("./adminController");
+const video = require("../config/video");
 
 
 const projectId=process.env.projectId;
@@ -18,20 +19,35 @@ const bucketName=process.env.bucketName;
 const bucket = storage.bucket(bucketName);
 
 
+async function findState(lat,long){
+    const fetched_data=await axios.get(`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=${long},${lat}`);
+    const location=fetched_data.data.address;
+    let state=location.Region;
+    state=state.replace(" ","");
+    return state;
+}
+
 module.exports.bookTimeSlot = async (req,res)=>{
     const {date,time,mode,expertID} = req.params;
+    const expert = await Expert.findById(expertID);
     const farmer = req.user;
     //call the function to fetch link
     let book_slot;
+
+    const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]);
     if(mode==='physical')
-        book_slot=`UPDATE appointments_${state} SET farmerID='${farmer._id}', booked=true, mode='${mode}', link=NULL WHERE book_date=${date} AND book_time=${time} AND expertID='${expertID}'`
-    else
-        //write the query
+        book_slot=`UPDATE appointments_${state} SET farmerID='${farmer._id}', booked=true, mode='${mode}', link=NULL WHERE book_date='${date}' AND book_time='${time}' AND expertID='${expertID}'`;
+    else if(mode==='video'){
+        const meet_link = await video.addEvent(expert.email,date,time);
+        console.log(meet_link);
+        book_slot=`UPDATE appointments_${state} SET farmerID='${farmer._id}', booked=true, mode='${mode}', link='${meet_link}' WHERE book_date='${date}' AND book_time='${time}' AND expertID='${expertID}'`;
+    }
             
     //update into database table
-    con.query(book_slot,(err,res)=>{
+    con.query(book_slot,(err,result)=>{
         if(err)
-            console.log("Error in booking slot",err);            
+            console.log("Error in booking slot",err);
+        res.send("Slot Booking successful!");       
     });
 }
 
@@ -53,18 +69,16 @@ module.exports.findNearestExperts=async (req,res)=>{
 module.exports.findSlots= async (req,res)=>{
     const farmer = req.user;
     const {expertID} = req.params;
+    
     //getting state information from farmer's latitude, longitude
-    const fetched_data=await axios.get(`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=${farmer.location.coordinates[0]},${farmer.location.coordinates[1]}`);
-    const location=fetched_data.data.address;
-    let state=location.Region;
+    const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]);
     const date=req.body.date;
-    state=state.replace(" ","");
 
     //creating time slots of that date if it already doesn't exist
-    adminController.createTimeSlots(date,state,expertID);
+    await adminController.createTimeSlots(date,state,expertID);
     
     // Finding slots of that particular date
-    const find_slots=`SELECT * FROM appointments_${state} WHERE book_date='${date}'`;
+    const find_slots=`SELECT * FROM appointments_${state} WHERE book_date='${date}' AND expertID='${expertID}'`;
     con.query(find_slots,(err,result)=>{
         if(err)
             console.log("Error finding slots for the farmer");
