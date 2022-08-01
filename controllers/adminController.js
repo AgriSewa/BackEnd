@@ -45,6 +45,7 @@ module.exports.createNewExpert=async (req,res)=>{
     const newExpert=await Expert.create({
         name:expert.name,
         email:expert.email,
+        phone:expert.phone,
         location:{
             type: "Point",
             coordinates: [parseFloat(expert.lat), parseFloat(expert.long)]

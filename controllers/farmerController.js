@@ -105,3 +105,17 @@ module.exports.uploadImage=async (req, res) => {
       res.status(500).send(error);
     }
 }
+
+module.exports.viewAppointments = async(req,res) => {
+    const farmer = req.user
+    const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]);
+    var date_time = new Date();
+    const cur_date = date_time.getFullYear()+"-"+date_time.getMonth()+"-"+date_time.getDay()
+    const cur_time = date_time.getHours()+":"+date_time.getMinutes()+":"+date_time.getSeconds()
+    const appointments = `SELECT * FROM appointments_${state} WHERE farmerID='${farmer._id}' AND book_date>='${cur_date}' AND book_time>='${cur_time}'`
+    con.query(appointments,(err,result)=>{
+        if(err)
+            console.log("Error finding appointments for the farmer");
+        res.send(result);
+    });
+}

@@ -4,6 +4,7 @@ const Multer = require("multer");
 const path=require("path");
 const farmerController = require("../controllers/farmerController");
 const adminController = require("../controllers/adminController");
+const expertController = require("../controllers/expertController");
 const audio = require("../config/audio");
 const video=require("../config/video");
 const middleware = require("../config/middleware");
@@ -35,7 +36,10 @@ router.get('/get/nearest',farmerController.findNearestExperts);
 router.post('/uploadimg',multer.single("imgfile"),farmerController.uploadImage);
 router.get('/slots/:expertID',middleware.getAuthenticatedFarmer,farmerController.findSlots);
 router.get('/bookslot/:date/:time/:mode/:expertID',middleware.getAuthenticatedFarmer,farmerController.bookTimeSlot);
+router.get('/farmer/appointments',middleware.getAuthenticatedFarmer,farmerController.viewAppointments);
 
+//Expert Routes
+router.get('/expert/appointments',middleware.getAuthenticatedExpert,expertController.viewAppointments);
 
 //Both Farmer and expert
 router.get('/index',(req,res)=>{
