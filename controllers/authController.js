@@ -27,7 +27,7 @@ exports.register = async(req, res, next) =>{
             channel : "sms"
         })
         .then((data)=>{
-            res.status(200).send("Success")
+            return res.json({success:true})
         });
         
     }
@@ -53,8 +53,8 @@ exports.verifyRegister = async(req, res, next)=>{
         }
         else{
             farmer.verified = true;
-            res.status(200).send("Done");
             farmer.save();
+            return res.json({success:true,message:"Registration Successful"})
         }
     })}
     catch(error){
@@ -76,7 +76,7 @@ exports.loginFarmer = async(req, res, next) =>{
             channel : "sms"
         })
         .then((data)=>{
-            res.status(200).send("Success")
+            return res.json({success:true})
         })
         
     }
@@ -101,7 +101,7 @@ exports.verifyLoginFarmer = async(req, res, next)=>{
             }
             else{
                 const token=jwt.sign({_id:farmer._id},JWT_SECRET)
-                res.status(200).send(token);
+                return res.json({success:true,message:"Login successful",token:token,user:farmer})
             }
         })
     }
