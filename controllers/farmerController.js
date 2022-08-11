@@ -36,8 +36,10 @@ module.exports.bookTimeSlot = async (req,res)=>{
 
     const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]);
 
-    if(mode==='physical')
-        book_slot=`UPDATE appointments_${state} SET farmerID='${farmer._id}', booked=true, mode='${mode}', link=NULL WHERE book_date='${date}' AND book_time='${time}' AND expertID='${expertID}'`;
+    if(mode==='physical'){
+        const meet_link=`https://www.google.com/maps?q=${expert.location.coordinates[1]},${expert.location.coordinates[0]}`;
+        book_slot=`UPDATE appointments_${state} SET farmerID='${farmer._id}', booked=true, mode='${mode}', link='${meet_link}' WHERE book_date='${date}' AND book_time='${time}' AND expertID='${expertID}'`;
+    }        
     else if(mode==='video'){
         const meet_link = await video.addEvent(expert.email,date,time);
         console.log(meet_link);
@@ -56,16 +58,31 @@ module.exports.bookTimeSlot = async (req,res)=>{
 }
 
 module.exports.uploadFeedback = async (req,res)=>{
-    const {slotId,feedback} = req.body;
+    const {feedback} = req.body;
+    const {resultID} = req.params;
     const farmer = req.user;
-    const slotID=parseInt(slotId);
-
-    submit_feedback=`UPDATE result_${state} SET feedback='${feedback}',farmerID='${farmer._id}' WHERE slotID=${slotID}`;
-    con.query(submit_feedback,(err,result)=>{
-        if(err)
-            return res.send("Error in saving feedback");
-        res.send("Successfully submitted Feedback");
-    });
+    try {
+        if (req.file) {
+            const url=`https://storage.googleapis.com/${bucketName}/${req.file.originalname}`
+            const blob = bucket.file(req.file.originalname);
+            const blobStream = blob.createWriteStream();
+    
+            blobStream.on("finish", () => {
+                console.log(url)
+                submit_feedback=`UPDATE result_${state} SET feedback='${feedback}',farmerID='${farmer._id}',image='${url}' WHERE id=${resultID}`;
+                con.query(submit_feedback,(err,result)=>{
+                    if(err)
+                        return res.json({success:false,message:"Error in saving feedback"});
+                    return res.json({success:true,message:"Successfully submitted Feedback"});
+                });
+            });
+            blobStream.end(req.file.buffer);
+        }else {
+            return res.json({success:false,message:"Error in saving feedback"});
+        }
+    }catch (error) {
+        return res.json({success:false,message:"Error in saving feedback"});
+    }
     
 }
 
@@ -75,7 +92,7 @@ module.exports.findAppointments = async (req,res)=>{
     const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]);
     const today = new Date().toISOString().slice(0, 10);
     console.log(today);
-    const sql=`SELECT * FROM appointments_${state} WHERE farmerID='${farmer._id}' AND book_date<='${today}'`; 
+    const sql=`SELECT * FROM appointments_${state} WHERE farmerID='${farmer._id}' AND book_date>='${today}'`; 
     
     con.query(sql,(err,result)=>{
         if(err)
@@ -139,6 +156,7 @@ module.exports.uploadImage=async (req, res) => {
     }
 }
 
+
 module.exports.viewResults = async(req,res) => {
     const farmer = req.user;
     const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]);
@@ -146,6 +164,6 @@ module.exports.viewResults = async(req,res) => {
     con.query(appointments,(err,result)=>{
         if(err)
             console.log("Error finding appointments for the farmer");
-        res.send(result);
+        return res.json({results:result})
     });
 }

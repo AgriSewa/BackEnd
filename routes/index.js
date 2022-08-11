@@ -39,7 +39,7 @@ router.get('/slots/:expertID',middleware.getAuthenticatedFarmer,farmerController
 router.get('/bookslot/:date/:time/:mode/:expertID',middleware.getAuthenticatedFarmer,farmerController.bookTimeSlot);
 router.get('/farmer/viewResults',middleware.getAuthenticatedFarmer,farmerController.viewResults);
 router.get('/farmer/upcoming',middleware.getAuthenticatedFarmer,farmerController.findAppointments);
-router.post('/feedback',middleware.getAuthenticatedFarmer,farmerController.uploadFeedback);
+router.post('/feedback/:resultID',middleware.getAuthenticatedFarmer,farmerController.uploadFeedback);
 
 //Expert Routes
 router.get('/expert/upcoming',middleware.getAuthenticatedExpert,expertController.viewAppointments);
