@@ -32,14 +32,20 @@ router.get("/file", (req, res) => {
 });
 
 //Farmer Routes
+router
 router.get('/get/nearest',farmerController.findNearestExperts);
 router.post('/uploadimg',multer.single("imgfile"),farmerController.uploadImage);
 router.get('/slots/:expertID',middleware.getAuthenticatedFarmer,farmerController.findSlots);
 router.get('/bookslot/:date/:time/:mode/:expertID',middleware.getAuthenticatedFarmer,farmerController.bookTimeSlot);
-router.get('/farmer/appointments',middleware.getAuthenticatedFarmer,farmerController.viewAppointments);
+router.get('/farmer/viewResults',middleware.getAuthenticatedFarmer,farmerController.viewResults);
+router.get('/farmer/upcoming',middleware.getAuthenticatedFarmer,farmerController.findAppointments);
+router.post('/feedback',middleware.getAuthenticatedFarmer,farmerController.uploadFeedback);
 
 //Expert Routes
-router.get('/expert/appointments',middleware.getAuthenticatedExpert,expertController.viewAppointments);
+router.get('/expert/upcoming',middleware.getAuthenticatedExpert,expertController.viewAppointments);
+router.post('/expert/advice',middleware.getAuthenticatedExpert,expertController.submitAdvice);
+router.get('/expert/viewResults',middleware.getAuthenticatedExpert,expertController.viewResults);
+
 
 //Both Farmer and expert
 router.get('/index',(req,res)=>{
@@ -47,6 +53,7 @@ router.get('/index',(req,res)=>{
     res.sendFile(path.join(__dirname,'..','views/index.html'));
 })
 
+router.get("/schedule",adminController.scheduleEvent);
 router.post("/join-room",audio.joinRoom);
 router.post("/room/link",video.addEvent);
 

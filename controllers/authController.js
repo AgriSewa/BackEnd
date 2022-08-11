@@ -32,7 +32,7 @@ exports.register = async(req, res, next) =>{
         
     }
     catch(error){
-        next(error)
+        return res.json({success:false});
     } 
 }
 
@@ -65,9 +65,9 @@ exports.verifyRegister = async(req, res, next)=>{
 exports.loginFarmer = async(req, res, next) =>{
     const {phone} = req.body
     try{
-        const farmer = await Farmer.find({phone:phone});
+        const farmer = await Farmer.findOne({phone:phone});
         let ph = parseInt("91"+farmer.phone);
- 
+        
         //console.log(config.serviceID)
         await client.verify.services(config.serviceId)
         .verifications

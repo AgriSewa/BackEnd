@@ -35,11 +35,15 @@ module.exports.bookTimeSlot = async (req,res)=>{
     let book_slot;
 
     const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]);
+
     if(mode==='physical')
         book_slot=`UPDATE appointments_${state} SET farmerID='${farmer._id}', booked=true, mode='${mode}', link=NULL WHERE book_date='${date}' AND book_time='${time}' AND expertID='${expertID}'`;
     else if(mode==='video'){
         const meet_link = await video.addEvent(expert.email,date,time);
         console.log(meet_link);
+        book_slot=`UPDATE appointments_${state} SET farmerID='${farmer._id}', booked=true, mode='${mode}', link='${meet_link}' WHERE book_date='${date}' AND book_time='${time}' AND expertID='${expertID}'`;
+    }else if(mode==='audio'){
+        const meet_link=expert.id+farmer._id;
         book_slot=`UPDATE appointments_${state} SET farmerID='${farmer._id}', booked=true, mode='${mode}', link='${meet_link}' WHERE book_date='${date}' AND book_time='${time}' AND expertID='${expertID}'`;
     }
             
@@ -51,6 +55,34 @@ module.exports.bookTimeSlot = async (req,res)=>{
     });
 }
 
+module.exports.uploadFeedback = async (req,res)=>{
+    const {slotId,feedback} = req.body;
+    const farmer = req.user;
+    const slotID=parseInt(slotId);
+
+    submit_feedback=`UPDATE result_${state} SET feedback='${feedback}',farmerID='${farmer._id}' WHERE slotID=${slotID}`;
+    con.query(submit_feedback,(err,result)=>{
+        if(err)
+            return res.send("Error in saving feedback");
+        res.send("Successfully submitted Feedback");
+    });
+    
+}
+
+module.exports.findAppointments = async (req,res)=>{
+
+    const farmer = req.user;
+    const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]);
+    const today = new Date().toISOString().slice(0, 10);
+    console.log(today);
+    const sql=`SELECT * FROM appointments_${state} WHERE farmerID='${farmer._id}' AND book_date<='${today}'`; 
+    
+    con.query(sql,(err,result)=>{
+        if(err)
+            console.log("Error in finding appointment slots",err);
+        res.send(result);       
+    });
+}
 
 module.exports.findNearestExperts=async (req,res)=>{
     var options={
@@ -76,6 +108,7 @@ module.exports.findSlots= async (req,res)=>{
 
     //creating time slots of that date if it already doesn't exist
     await adminController.createTimeSlots(date,state,expertID);
+    adminController.createResultsTable(date,state,expertID);
     
     // Finding slots of that particular date
     const find_slots=`SELECT * FROM appointments_${state} WHERE book_date='${date}' AND expertID='${expertID}'`;
@@ -106,13 +139,10 @@ module.exports.uploadImage=async (req, res) => {
     }
 }
 
-module.exports.viewAppointments = async(req,res) => {
-    const farmer = req.user
+module.exports.viewResults = async(req,res) => {
+    const farmer = req.user;
     const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]);
-    var date_time = new Date();
-    const cur_date = date_time.getFullYear()+"-"+date_time.getMonth()+"-"+date_time.getDay()
-    const cur_time = date_time.getHours()+":"+date_time.getMinutes()+":"+date_time.getSeconds()
-    const appointments = `SELECT * FROM appointments_${state} WHERE farmerID='${farmer._id}' AND book_date>='${cur_date}' AND book_time>='${cur_time}'`
+    const appointments = `SELECT * FROM results_${state} WHERE farmerID='${farmer._id}' ORDER BY book_date DESC`;
     con.query(appointments,(err,result)=>{
         if(err)
             console.log("Error finding appointments for the farmer");

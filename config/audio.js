@@ -50,13 +50,15 @@ var getAccessToken = (roomName) => {
 var joinRoom = async (req, res) => {
     // return 400 if the request has an empty body or no roomName
     if (!req.body || !req.body.roomName) {
-    return res.status(400).send("Must include roomName argument.");
+        return res.status(400).send("Must include roomName argument.");
     }
     const roomName = req.body.roomName;
+
     // find or create a room with the given roomName
-    findOrCreateRoom(roomName);
+    await findOrCreateRoom(roomName);
     // generate an Access Token for a participant in this room
     const token = getAccessToken(roomName);
+    
     res.send({
         token: token,
     });

@@ -1,5 +1,6 @@
 const Expert=require("../models/Expert");
 const con=require("../config/db");
+const scheduler=require("node-cron");
 
 const end_time=17;
 
@@ -8,8 +9,9 @@ module.exports.createTimeSlots=async (date,state,expertID)=>{
     
     //create table if not already exists for appointments in that particular state
     return new Promise(function(resolve,reject){
-        const sql_create_table=`CREATE TABLE IF NOT EXISTS appointments_${state}(id int primary key auto_increment,book_date date,booked boolean,book_time time, farmerID varchar(50), expertID varchar(50), mode varchar(10), link varchar(50), unique(book_date,book_time,expertID))`;
-        con.query(sql_create_table, function (err, result) {
+        const sql_create_appointmentTable=`CREATE TABLE IF NOT EXISTS appointments_${state}(id int primary key auto_increment,book_date date,booked boolean,book_time time, farmerID varchar(50), expertID varchar(50), mode varchar(10), link varchar(50), unique(book_date,book_time,expertID))`;
+        
+        con.query(sql_create_appointmentTable, function (err, result) {
             
             if(err)
                 console.log("Error in creating Appointments table",err);
@@ -39,6 +41,39 @@ module.exports.createTimeSlots=async (date,state,expertID)=>{
     
 }
 
+module.exports.createResultsTable = async(date,state,expertID)=>{
+    const sql_create_resultTable=`CREATE TABLE IF NOT EXISTS results_${state}(id int primary key auto_increment,slotID int,farmerID varchar(50), expertID varchar(50), book_date date,feedback varchar(100),advice varchar(100),problem varchar(100),update_expert boolean DEFAULT FALSE,update_farmer boolean DEFAULT FALSE)`;
+    
+    con.query(sql_create_resultTable, function (err, result) {
+            
+        if(err)
+            console.log("Error in creating Results table",err);
+        else
+            console.log("Table created");
+
+        //create all the time slots for current date
+        const slots_sql=`SELECT * FROM appointments_${state} WHERE book_date='${date}' AND expertID='${expertID}'`;
+        con.query(slots_sql,(err,result)=>{
+            if(err)
+                console.log(err);
+            for(let i=0;i<result.length;i++){
+                let slot=result[i];
+                const book_date=slot.book_date.toISOString().slice(0, 10);
+                const result_slot=`INSERT INTO results_${state}(id,slotID,expertID,book_date) VALUES(DEFAULT,'${slot.id}','${expertID}','${book_date}')`;
+                con.query(result_slot,(err,res)=>{
+                    
+                    //Duplicate Slots for the date
+                    if(err && err.errno===1062)
+                        console.log("Slot already exists");
+                    else if(err)
+                        console.log("Error in inserting time slot into db",err);
+                });
+            }
+        });
+        
+
+    });
+}
 
 module.exports.createNewExpert=async (req,res)=>{
     const expert=req.body;
@@ -53,3 +88,12 @@ module.exports.createNewExpert=async (req,res)=>{
     });
     res.send(newExpert);
 }
+
+module.exports.scheduleEvent = (req,res)=>{
+    const date=new Date();
+    date.setSeconds(date.getSeconds()+5);
+    scheduler.schedule(date,()=>{
+        console.log("Yo");
+    });
+    res.send(date.toLocaleString());
+};
