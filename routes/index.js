@@ -33,9 +33,9 @@ router.get("/file", (req, res) => {
 
 //Farmer Routes
 router
-router.get('/get/nearest',farmerController.findNearestExperts);
+router.get('/get/nearest',middleware.getAuthenticatedFarmer,farmerController.findNearestExperts);
 router.post('/uploadimg',multer.single("imgfile"),farmerController.uploadImage);
-router.get('/slots/:expertID',middleware.getAuthenticatedFarmer,farmerController.findSlots);
+router.post('/slots/:expertID',middleware.getAuthenticatedFarmer,farmerController.findAllSlots);
 router.get('/bookslot/:date/:time/:mode/:expertID',middleware.getAuthenticatedFarmer,farmerController.bookTimeSlot);
 router.get('/farmer/viewResults',middleware.getAuthenticatedFarmer,farmerController.viewResults);
 router.get('/farmer/upcoming',middleware.getAuthenticatedFarmer,farmerController.findAppointments);
