@@ -51,7 +51,7 @@ module.exports.createTimeSlots=async (date,state,expertID)=>{
 }
 
 module.exports.createResultsTable = async(date,state,expertID)=>{
-    const sql_create_resultTable=`CREATE TABLE IF NOT EXISTS results_${state}(id int primary key auto_increment,slotID int,farmerID varchar(50), expertID varchar(50), image varchar(1000) DEFAULT 'https://thumbs.dreamstime.com/b/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg', book_date date,feedback varchar(100),advice varchar(100) DEFAULT 'Yet to be uploaded',problem varchar(100) DEFAULT 'Yet to be uploaded',update_expert boolean DEFAULT FALSE,update_farmer boolean DEFAULT FALSE)`;
+    const sql_create_resultTable=`CREATE TABLE IF NOT EXISTS results_${state}(id int primary key auto_increment,slotID int UNIQUE,farmerID varchar(50), expertID varchar(50), image varchar(1000) DEFAULT 'https://thumbs.dreamstime.com/b/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg', book_date date,feedback varchar(100),advice varchar(100) DEFAULT 'Yet to be uploaded',problem varchar(100) DEFAULT 'Yet to be uploaded',update_expert boolean DEFAULT FALSE,update_farmer boolean DEFAULT FALSE)`;
     
     con.query(sql_create_resultTable, function (err, result) {
             

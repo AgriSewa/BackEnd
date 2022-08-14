@@ -18,8 +18,9 @@ const bucket = storage.bucket(bucketName);
 
 
 async function findState(lat,long){
-    const fetched_data=await axios.get(`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=${lat},${long}`);
+    const fetched_data=await axios.get(`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=${long},${lat}`);
     const location=fetched_data.data.address;
+    console.log(location);
     let state=location.Region;
     state=state.replace(" ","");
     return state;
@@ -39,7 +40,8 @@ module.exports.bookTimeSlot = async (req, res) => {
     farmer.location.coordinates[1],
     farmer.location.coordinates[0]
   );
-
+    console.log(state);
+    return res.send("yo");
   if (mode === "physical") {
     const meet_link = `https://www.google.com/maps?q=${expert.location.coordinates[1]},${expert.location.coordinates[0]}`;
     book_slot = `UPDATE appointments_${state} SET farmerID='${farmer._id}', booked=true, mode='${mode}', link='${meet_link}' WHERE book_date='${date}' AND book_time='${time}' AND expertID='${expertID}'`;

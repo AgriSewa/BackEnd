@@ -14,7 +14,7 @@ exports.register = async(req, res, next) =>{
             phone,
             location:{
                 type: "Point",
-                coordinates: [parseFloat(lat), parseFloat(long)]
+                coordinates: [parseFloat(long), parseFloat(lat)]
             }
         });
         let ph = parseInt("91"+user.phone)
