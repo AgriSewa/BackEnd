@@ -121,7 +121,7 @@ module.exports.findAppointments = async (req, res) => {
     farmer.location.coordinates[0]
   );
   const today = new Date().toISOString().slice(0, 10);
-  console.log(today);
+  console.log("HI"+today);
   const sql = `SELECT * FROM appointments_${state} WHERE farmerID='${farmer._id}' AND book_date>='${today}'`;
 
   con.query(sql, (err, result) => {
@@ -187,14 +187,14 @@ module.exports.uploadImage = async (req, res) => {
 
       blobStream.on("finish", () => {
         console.log(url);
-        res.status(200).send(url);
+        return res.json({success:true});
       });
       blobStream.end(req.file.buffer);
     } else {
-      throw "error with img";
+        return res.json({success:false});
     }
   } catch (error) {
-    res.status(500).send(error);
+    return res.json({success:false});
   }
 };
 
