@@ -20,7 +20,6 @@ const bucket = storage.bucket(bucketName);
 async function findState(lat,long){
     const fetched_data=await axios.get(`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=${long},${lat}`);
     const location=fetched_data.data.address;
-    console.log(location);
     let state=location.Region;
     state=state.replace(" ","");
     return state;
@@ -40,8 +39,7 @@ module.exports.bookTimeSlot = async (req, res) => {
     farmer.location.coordinates[1],
     farmer.location.coordinates[0]
   );
-    console.log(state);
-    return res.send("yo");
+
   if (mode === "physical") {
     const meet_link = `https://www.google.com/maps?q=${expert.location.coordinates[1]},${expert.location.coordinates[0]}`;
     book_slot = `UPDATE appointments_${state} SET farmerID='${farmer._id}', booked=true, mode='${mode}', link='${meet_link}' WHERE book_date='${date}' AND book_time='${time}' AND expertID='${expertID}'`;
@@ -54,6 +52,20 @@ module.exports.bookTimeSlot = async (req, res) => {
     const meet_link = expert.id + farmer._id;
     book_slot = `UPDATE appointments_${state} SET farmerID='${farmer._id}', booked=true, mode='${mode}', link='${meet_link}' WHERE book_date='${date}' AND book_time='${time}' AND expertID='${expertID}'`;
   }
+
+  const find_slot=`SELECT * FROM appointments_${state} WHERE book_date='${date}' AND book_time='${time}' AND expertID='${expertID}'`;
+  con.query(find_slot,(err,result)=>{
+    if(err)
+        console.log("Error in querying database");
+    if(result.length){
+        const slot=result[0];
+        const update_result=`UPDATE results_${state} SET farmerID='${farmer._id}' WHERE slotID='${slot.id}'`;
+        con.query(update_result,(err,result)=>{
+            if(err)
+                console.log("Error in updating farmer database");
+        });
+    }
+  });
 
   //update into database table
   con.query(book_slot, (err, result) => {
@@ -71,7 +83,7 @@ module.exports.uploadFeedback = async (req, res) => {
     farmer.location.coordinates[1],
     farmer.location.coordinates[0]
   );
-
+  const feedbackInt=parseInt(feedback);
   try {
     if (req.file) {
       const url = `https://storage.googleapis.com/${bucketName}/${req.file.originalname}`;
@@ -80,7 +92,7 @@ module.exports.uploadFeedback = async (req, res) => {
 
       blobStream.on("finish", () => {
         console.log(url);
-        submit_feedback = `UPDATE result_${state} SET feedback='${feedback}',image='${url}' WHERE id=${resultID}`;
+        submit_feedback = `UPDATE results_${state} SET feedback=${feedbackInt},image='${url}',update_farmer=TRUE WHERE id=${resultID}`;
         con.query(submit_feedback, (err, result) => {
           if (err)
             return res.json({
@@ -119,11 +131,12 @@ module.exports.findAppointments = async (req, res) => {
 }
 
 module.exports.findNearestExperts = async (req, res) => {
+    const farmer = req.user;
   var options = {
     location: {
       $near: {
-        $geometry: { type: "Point", coordinates: [77.497, 27.204] },
-        $maxDistance: 5000,
+        $geometry: { type: "Point", coordinates: [farmer.location.coordinates[0], farmer.location.coordinates[1]] },
+        $maxDistance: 20000,
       },
     },
   };

@@ -27,9 +27,6 @@ router.get('/hello',(req,res)=>{
 router.post('/create/expert',adminController.createNewExpert);
 router.get('/create/slots',adminController.createTimeSlots);
 
-router.get("/file", (req, res) => {
-    res.sendFile(path.join(__dirname,'..',"views/upload.html"));
-});
 
 //Farmer Routes
 router.get('/get/nearby',middleware.getAuthenticatedFarmer,farmerController.findNearestExperts);
@@ -47,12 +44,7 @@ router.get('/expert/viewResults',middleware.getAuthenticatedExpert,expertControl
 
 
 //Both Farmer and expert
-router.get('/index',(req,res)=>{
-    console.log("yo");
-    res.sendFile(path.join(__dirname,'..','views/index.html'));
-})
 
-router.get("/schedule",adminController.scheduleEvent);
 router.post("/join-room",audio.joinRoom);
 router.post("/room/link",video.addEvent);
 
