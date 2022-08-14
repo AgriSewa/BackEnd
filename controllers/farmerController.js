@@ -48,7 +48,23 @@ module.exports.bookTimeSlot = async (req,res)=>{
         const meet_link=expert.id+farmer._id;
         book_slot=`UPDATE appointments_${state} SET farmerID='${farmer._id}', booked=true, mode='${mode}', link='${meet_link}' WHERE book_date='${date}' AND book_time='${time}' AND expertID='${expertID}'`;
     }
-            
+    
+    const find_slot=`SELECT * FROM appointments_${state} WHERE book_date='${date}' AND book_time='${time}' AND expertID='${expertID}'`;
+    con.query(find_slot,(err,result)=>{
+        if(err)
+            console.log("Error in finding slot",err);
+        if(result.length){
+            const slot=result[0];
+            const update_result=`UPDATE results_${state} SET farmerID='${farmer._id}' WHERE slotID=${slot.id}`;
+            con.query(update_result,(err,result)=>{
+                if(err)
+                    console.log("Error in booking slot",err);
+                console.log("Result Table updation successful!");
+            });
+        }
+        
+    });
+
     //update into database table
     con.query(book_slot,(err,result)=>{
         if(err)
@@ -61,6 +77,8 @@ module.exports.uploadFeedback = async (req,res)=>{
     const {feedback} = req.body;
     const {resultID} = req.params;
     const farmer = req.user;
+
+    const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]);
     try {
         if (req.file) {
             const url=`https://storage.googleapis.com/${bucketName}/${req.file.originalname}`
@@ -69,10 +87,12 @@ module.exports.uploadFeedback = async (req,res)=>{
     
             blobStream.on("finish", () => {
                 console.log(url)
-                submit_feedback=`UPDATE result_${state} SET feedback='${feedback}',farmerID='${farmer._id}',image='${url}' WHERE id=${resultID}`;
+                submit_feedback=`UPDATE results_${state} SET feedback='${feedback}',image='${url}' WHERE id=${resultID}`;
                 con.query(submit_feedback,(err,result)=>{
+                    console.log(err);
                     if(err)
                         return res.json({success:false,message:"Error in saving feedback"});
+                    
                     return res.json({success:true,message:"Successfully submitted Feedback"});
                 });
             });
@@ -115,24 +135,31 @@ module.exports.findNearestExperts=async (req,res)=>{
     res.send(result);
 }
 
-module.exports.findSlots= async (req,res)=>{
+module.exports.findAllSlots=async (req,res)=>{
     const farmer = req.user;
     const {expertID} = req.params;
     
     //getting state information from farmer's latitude, longitude
-    const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]);
-    const date=req.body.date;
-
+    const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]); 
+    const date1=req.body.date1;
+    const date2=req.body.date2;
+    const date3=req.body.date3;
+    const list1=await this.findSlots(date1,state,expertID);
+    const list2=await this.findSlots(date2,state,expertID);
+    const list3=await this.findSlots(date3,state,expertID);
+    res.send({list1,list2,list3});
+}
+module.exports.findSlots= async (date,state,expertID)=>{
     //creating time slots of that date if it already doesn't exist
     await adminController.createTimeSlots(date,state,expertID);
     adminController.createResultsTable(date,state,expertID);
-    
     // Finding slots of that particular date
     const find_slots=`SELECT * FROM appointments_${state} WHERE book_date='${date}' AND expertID='${expertID}'`;
     con.query(find_slots,(err,result)=>{
         if(err)
             console.log("Error finding slots for the farmer");
-        res.send(result);
+        console.log(result);
+        return result;
     });
 }
 

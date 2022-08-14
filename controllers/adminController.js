@@ -18,23 +18,31 @@ module.exports.createTimeSlots=async (date,state,expertID)=>{
             else
                 console.log("Table created");
 
-            //create all the time slots for current date
-            for(let i=10;i<=end_time;i++){
-                const time=(i+':00:00');
-                const time_slot=`INSERT INTO appointments_${state}(id,book_date,booked,book_time,expertID) VALUES(DEFAULT,'${date}',FALSE,'${time}','${expertID}')`;
-                
-                //insert into database table
-                con.query(time_slot,(err,res)=>{
-                    
-                    //Duplicate Slots for the date
-                    if(err && err.errno===1062)
-                        console.log("Slot already exists");
-                    else if(err)
-                        console.log("Error in inserting time slot into db",err);
-                    if(i==end_time)
-                        resolve();
-                });
-            }
+            const slot_exist=`SELECT * FROM appointments_${state} WHERE book_date='${date}' AND expertID='${expertID}'`;
+            con.query(slot_exist,(err,result)=>{
+                if(err)
+                    reject("Error while qyerying database");
+                if(result.length===0){
+                     //create all the time slots for current date
+                    for(let i=10;i<=end_time;i++){
+                        const time=(i+':00:00');
+                        const time_slot=`INSERT INTO appointments_${state}(id,book_date,booked,book_time,expertID) VALUES(DEFAULT,'${date}',FALSE,'${time}','${expertID}')`;
+                        
+                        //insert into database table
+                        con.query(time_slot,(err,res)=>{
+                            
+                            //Duplicate Slots for the date
+                            if(err && err.errno===1062)
+                                console.log("Slot already exists");
+                            else if(err)
+                                console.log("Error in inserting time slot into db",err);
+                            if(i==end_time)
+                                resolve();
+                        });
+                    }
+                }else
+                    resolve();
+            });
 
         });
     });
@@ -42,7 +50,7 @@ module.exports.createTimeSlots=async (date,state,expertID)=>{
 }
 
 module.exports.createResultsTable = async(date,state,expertID)=>{
-    const sql_create_resultTable=`CREATE TABLE IF NOT EXISTS results_${state}(id int primary key auto_increment,slotID int,farmerID varchar(50), expertID varchar(50), image varchar(1000) 'https://thumbs.dreamstime.com/b/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg', book_date date,feedback varchar(100),advice varchar(100) DEFAULT 'Yet to be uploaded',problem varchar(100) DEFAULT 'Yet to be uploaded',update_expert boolean DEFAULT FALSE,update_farmer boolean DEFAULT FALSE)`;
+    const sql_create_resultTable=`CREATE TABLE IF NOT EXISTS results_${state}(id int primary key auto_increment,slotID int,farmerID varchar(50), expertID varchar(50), image varchar(1000) DEFAULT 'https://thumbs.dreamstime.com/b/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg', book_date date,feedback varchar(100),advice varchar(100) DEFAULT 'Yet to be uploaded',problem varchar(100) DEFAULT 'Yet to be uploaded',update_expert boolean DEFAULT FALSE,update_farmer boolean DEFAULT FALSE)`;
     
     con.query(sql_create_resultTable, function (err, result) {
             
@@ -58,8 +66,7 @@ module.exports.createResultsTable = async(date,state,expertID)=>{
                 console.log(err);
             for(let i=0;i<result.length;i++){
                 let slot=result[i];
-                const book_date=slot.book_date.toISOString().slice(0, 10);
-                const result_slot=`INSERT INTO results_${state}(id,slotID,expertID,book_date) VALUES(DEFAULT,'${slot.id}','${expertID}','${book_date}')`;
+                const result_slot=`INSERT INTO results_${state}(id,slotID,expertID,book_date) VALUES(DEFAULT,'${slot.id}','${expertID}','${date}')`;
                 con.query(result_slot,(err,res)=>{
                     
                     //Duplicate Slots for the date

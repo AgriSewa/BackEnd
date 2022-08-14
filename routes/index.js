@@ -33,13 +33,13 @@ router.get("/file", (req, res) => {
 
 //Farmer Routes
 router
-router.get('/get/nearest',farmerController.findNearestExperts);
-router.post('/uploadimg',multer.single("imgfile"),farmerController.uploadImage);
-router.get('/slots/:expertID',middleware.getAuthenticatedFarmer,farmerController.findSlots);
+router.get('/get/nearby',farmerController.findNearestExperts);
+router.post('/uploadimg',middleware.getAuthenticatedFarmer,multer.single("imgfile"),farmerController.uploadImage);
+router.get('/slots/:expertID',middleware.getAuthenticatedFarmer,farmerController.findAllSlots);
 router.get('/bookslot/:date/:time/:mode/:expertID',middleware.getAuthenticatedFarmer,farmerController.bookTimeSlot);
 router.get('/farmer/viewResults',middleware.getAuthenticatedFarmer,farmerController.viewResults);
 router.get('/farmer/upcoming',middleware.getAuthenticatedFarmer,farmerController.findAppointments);
-router.post('/feedback/:resultID',middleware.getAuthenticatedFarmer,farmerController.uploadFeedback);
+router.post('/feedback/:resultID',middleware.getAuthenticatedFarmer,multer.single("imgfile"),farmerController.uploadFeedback);
 
 //Expert Routes
 router.get('/expert/upcoming',middleware.getAuthenticatedExpert,expertController.viewAppointments);

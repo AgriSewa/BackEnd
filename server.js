@@ -14,6 +14,7 @@ app.use(cors());
 app.use(morgan("dev"));
 
 require('./config/db');
+require('./config/redis');
 
 
 //routing
