@@ -32,7 +32,6 @@ router.get("/file", (req, res) => {
 });
 
 //Farmer Routes
-router
 router.get('/get/nearby',farmerController.findNearestExperts);
 router.post('/uploadimg',middleware.getAuthenticatedFarmer,multer.single("imgfile"),farmerController.uploadImage);
 router.get('/slots/:expertID',middleware.getAuthenticatedFarmer,farmerController.findAllSlots);

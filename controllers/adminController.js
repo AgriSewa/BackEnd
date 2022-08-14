@@ -15,13 +15,14 @@ module.exports.createTimeSlots=async (date,state,expertID)=>{
             
             if(err)
                 console.log("Error in creating Appointments table",err);
-            else
-                console.log("Table created");
+
+            //create all the time slots for current date
+             
 
             const slot_exist=`SELECT * FROM appointments_${state} WHERE book_date='${date}' AND expertID='${expertID}'`;
             con.query(slot_exist,(err,result)=>{
                 if(err)
-                    reject("Error while qyerying database");
+                    return ("Error while qyerying database");
                 if(result.length===0){
                      //create all the time slots for current date
                     for(let i=10;i<=end_time;i++){
@@ -56,8 +57,6 @@ module.exports.createResultsTable = async(date,state,expertID)=>{
             
         if(err)
             console.log("Error in creating Results table",err);
-        else
-            console.log("Table created");
 
         //create all the time slots for current date
         const slots_sql=`SELECT * FROM appointments_${state} WHERE book_date='${date}' AND expertID='${expertID}'`;

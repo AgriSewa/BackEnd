@@ -50,6 +50,7 @@ const addEventToGoogleCalender = async (
         ],
       },
     }
+    console.log(event);
     const eventData = await calendar.events.insert({
       auth: oAuth2Client,
       calendarId: 'primary',
@@ -107,11 +108,14 @@ exports.deleteEventFromGoogleCalender = (eventId) => {
 
 exports.addEvent = async(expertEmail,date,time) => {
     try {
+         
         //const { startTime, endTime, location, description, colorId } = req.body;
-        const start = date+"T"+time+".000000+05:30";
+        const start = date+"T"+time+":00.000000+05:30";
         const end = date+"T"+"18:00:00"+".000000+05:30";
         const attendees=[{"email":expertEmail},{"email":"agnivg157@gmail.com"}];
+        console.log("bef")
         const resp = await addEventToGoogleCalender("Appointment", start, end, "Kolkata", "Meet with Expert", 1, attendees);
+        console.log("aft")
         const { data } = resp;
         return data.hangoutLink;
         
