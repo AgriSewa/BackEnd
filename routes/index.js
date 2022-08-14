@@ -32,9 +32,9 @@ router.get("/file", (req, res) => {
 });
 
 //Farmer Routes
-router.get('/get/nearby',farmerController.findNearestExperts);
+router.get('/get/nearby',middleware.getAuthenticatedFarmer,farmerController.findNearestExperts);
 router.post('/uploadimg',middleware.getAuthenticatedFarmer,multer.single("imgfile"),farmerController.uploadImage);
-router.get('/slots/:expertID',middleware.getAuthenticatedFarmer,farmerController.findAllSlots);
+router.post('/slots/:expertID',middleware.getAuthenticatedFarmer,farmerController.findAllSlots);
 router.get('/bookslot/:date/:time/:mode/:expertID',middleware.getAuthenticatedFarmer,farmerController.bookTimeSlot);
 router.get('/farmer/viewResults',middleware.getAuthenticatedFarmer,farmerController.viewResults);
 router.get('/farmer/upcoming',middleware.getAuthenticatedFarmer,farmerController.findAppointments);

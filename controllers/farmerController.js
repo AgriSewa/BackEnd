@@ -18,7 +18,7 @@ const bucket = storage.bucket(bucketName);
 
 
 async function findState(lat,long){
-    const fetched_data=await axios.get(`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=${long},${lat}`);
+    const fetched_data=await axios.get(`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=${lat},${long}`);
     const location=fetched_data.data.address;
     let state=location.Region;
     state=state.replace(" ","");
@@ -146,6 +146,7 @@ module.exports.findAllSlots=async (req,res)=>{
 }
 
 module.exports.findSlots=  (date,state,expertID)=>{
+    console.log("yo");
     return new Promise(async(resolve,reject)=>{
         await adminController.createTimeSlots(date,state,expertID);
         adminController.createResultsTable(date,state,expertID);

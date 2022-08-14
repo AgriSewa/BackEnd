@@ -59,7 +59,7 @@ var joinRoom = async (req, res) => {
     // generate an Access Token for a participant in this room
     const token = getAccessToken(roomName);
     
-    res.send({
+    return res.json({
         token: token,
     });
 }
