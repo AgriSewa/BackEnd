@@ -113,9 +113,8 @@ exports.addEvent = async(expertEmail,date,time) => {
         const start = date+"T"+time+":00.000000+05:30";
         const end = date+"T"+"18:00:00"+".000000+05:30";
         const attendees=[{"email":expertEmail},{"email":"agnivg157@gmail.com"}];
-        console.log("bef")
         const resp = await addEventToGoogleCalender("Appointment", start, end, "Kolkata", "Meet with Expert", 1, attendees);
-        console.log("aft")
+      
         const { data } = resp;
         return data.hangoutLink;
         

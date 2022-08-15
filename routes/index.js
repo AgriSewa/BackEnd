@@ -36,6 +36,8 @@ router.get('/bookslot/:date/:time/:mode/:expertID',middleware.getAuthenticatedFa
 router.get('/farmer/viewResults',middleware.getAuthenticatedFarmer,farmerController.viewResults);
 router.get('/farmer/upcoming',middleware.getAuthenticatedFarmer,farmerController.findAppointments);
 router.post('/feedback/:resultID',middleware.getAuthenticatedFarmer,multer.single("imgfile"),farmerController.uploadFeedback);
+router.get('/set',middleware.getAuthenticatedFarmer,farmerController.setRedis);
+router.get('/get',middleware.getAuthenticatedFarmer,farmerController.getRedis);
 
 //Expert Routes
 router.get('/expert/upcoming',middleware.getAuthenticatedExpert,expertController.viewAppointments);
@@ -44,10 +46,11 @@ router.get('/expert/viewResults',middleware.getAuthenticatedExpert,expertControl
 
 
 //Both Farmer and expert
-
 router.post("/join-room",audio.joinRoom);
 router.post("/room/link",video.addEvent);
 
 
+//AI
+router.post("/result",adminController.updateResult);
 
 module.exports = router;

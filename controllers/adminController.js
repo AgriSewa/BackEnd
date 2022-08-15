@@ -94,3 +94,13 @@ module.exports.createNewExpert=async (req,res)=>{
     });
     res.send(newExpert);
 }
+
+module.exports.updateResult=async (req,res)=>{
+    const {problem,advice,image}=req.body;
+    submit_advice=`INSERT INTO results_${state}(problem,advice,image) VALUES('${problem}','${advice}','${image}');`;
+    con.query(submit_advice,(err,result)=>{
+        if(err)
+            return res.status(500).json({message:"Error in saving feedback"});
+        res.json({"message":"Successfully submitted Feedback"});
+    });
+}

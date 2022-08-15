@@ -43,6 +43,7 @@ module.exports.submitAdvice = async(req,res) =>{
     const state = await findState(expert.location.coordinates[1],expert.location.coordinates[0]);
 
     submit_advice=`UPDATE results_${state} SET advice='${advice}',problem='${problem}',update_expert=TRUE WHERE id=${resultID}`;
+
     con.query(submit_advice,(err,result)=>{
         if(err)
         return res.json({

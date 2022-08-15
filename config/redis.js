@@ -8,3 +8,5 @@ client.connect()
 .catch((err)=>{
     console.log("Error in connecting to redis");
 })
+
+module.exports=client;
