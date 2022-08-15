@@ -14,9 +14,10 @@ async function findState(lat,long){
 module.exports.viewAppointments = async(req,res) => {
     const expert = req.user
     const state=await findState(expert.location.coordinates[1],expert.location.coordinates[0]);
-    var date_time = new Date();
-    const cur_date = date_time.getFullYear()+"-"+date_time.getMonth()+"-"+date_time.getDay();
-    const appointments = `SELECT * FROM appointments_${state} WHERE expertID='${expert._id}' AND book_date>='${cur_date}'`;
+    const today = new Date().toISOString().slice(0, 10);
+    // var date_time = new Date();
+    // const cur_date = date_time.getFullYear()+"-"+date_time.getMonth()+"-"+date_time.getDay();
+    const appointments = `SELECT * FROM appointments_${state} WHERE expertID='${expert._id}' AND book_date>='${today}' AND mode IS NOT NULL`;
     con.query(appointments,(err,result)=>{
         if(err)
             console.log("Error finding appointments for the expert");
@@ -27,25 +28,30 @@ module.exports.viewAppointments = async(req,res) => {
 module.exports.viewResults = async(req,res) => {
     const expert = req.user;
     const state=await findState(expert.location.coordinates[1],expert.location.coordinates[0]);
-    const appointments = `SELECT * FROM results_${state} WHERE expertID='${expert._id}' ORDER BY book_date DESC`;
-    con.query(appointments,(err,result)=>{
+    const sql = `SELECT * FROM results_${state} WHERE expertID='${expert._id}' AND farmerID IS NOT NULL ORDER BY book_date DESC`;
+    con.query(sql,(err,result)=>{
         if(err)
-            console.log("Error finding appointments for the farmer");
-        res.send(result);
+            console.log("Error finding results for the expert");
+        return res.json({ results: result });
     });
 }
 
 module.exports.submitAdvice = async(req,res) =>{
-    const {slotId,problem,advice} = req.body;
+    const { resultID } = req.params;
+    const {problem,advice} = req.body;
     const expert = req.user
     const state = await findState(expert.location.coordinates[1],expert.location.coordinates[0]);
 
-    const slotID=parseInt(slotId);
-
-    submit_advice=`UPDATE result_${state} SET advice='${advice}',problem='${problem}',update_expert=TRUE WHERE slotID=${slotID}`;
+    submit_advice=`UPDATE results_${state} SET advice='${advice}',problem='${problem}',update_expert=TRUE WHERE id=${resultID}`;
     con.query(submit_advice,(err,result)=>{
         if(err)
-            return res.send("Error in saving feedback");
-        res.send("Successfully submitted Feedback");
+        return res.json({
+            success: false,
+            message: "Error in saving advice",
+        });
+        return res.json({
+            success: true,
+            message: "Successfully submitted Advice",
+        });
     });
 }

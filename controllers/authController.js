@@ -124,7 +124,7 @@ exports.loginExpert = async(req, res, next) =>{
             channel : "sms"
         })
         .then((data)=>{
-            res.status(200).send("Success")
+            return res.json({success:true})
         })
         
     }
@@ -149,7 +149,7 @@ exports.verifyLoginExpert = async(req, res, next)=>{
             }
             else{
                 const token=jwt.sign({_id:expert._id},JWT_SECRET)
-                res.status(200).send(token);
+                return res.json({success:true,message:"Login successful",token:token,user:expert})
             }
         })
     }

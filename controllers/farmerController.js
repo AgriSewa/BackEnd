@@ -121,7 +121,6 @@ module.exports.findAppointments = async (req, res) => {
     farmer.location.coordinates[0]
   );
   const today = new Date().toISOString().slice(0, 10);
-  console.log("HI"+today);
   const sql = `SELECT * FROM appointments_${state} WHERE farmerID='${farmer._id}' AND book_date>='${today}'`;
 
   con.query(sql, (err, result) => {
@@ -204,9 +203,9 @@ module.exports.viewResults = async (req, res) => {
     farmer.location.coordinates[1],
     farmer.location.coordinates[0]
   );
-  const appointments = `SELECT * FROM results_${state} WHERE farmerID='${farmer._id}' ORDER BY book_date DESC`;
-  con.query(appointments, (err, result) => {
-    if (err) console.log("Error finding appointments for the farmer");
+  const sql = `SELECT * FROM results_${state} WHERE farmerID='${farmer._id}' ORDER BY book_date DESC`;
+  con.query(sql, (err, result) => {
+    if (err) console.log("Error finding results for the farmer");
     return res.json({ results: result });
   });
 };

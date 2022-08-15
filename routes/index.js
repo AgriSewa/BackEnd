@@ -39,7 +39,7 @@ router.post('/feedback/:resultID',middleware.getAuthenticatedFarmer,multer.singl
 
 //Expert Routes
 router.get('/expert/upcoming',middleware.getAuthenticatedExpert,expertController.viewAppointments);
-router.post('/expert/advice',middleware.getAuthenticatedExpert,expertController.submitAdvice);
+router.post('/solution/:resultID',middleware.getAuthenticatedExpert,expertController.submitAdvice);
 router.get('/expert/viewResults',middleware.getAuthenticatedExpert,expertController.viewResults);
 
 
