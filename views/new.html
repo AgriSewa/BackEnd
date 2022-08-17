@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="video-container" style="display:flex;justify-content: center;"></div>
+    <script>
+        var container=document.getElementById("video-container");
+        const participantDiv = document.createElement("div");
+        participantDiv.style.height="100px";
+        participantDiv.style.width="100px";
+        participantDiv.style.margin="1rem";
+        participantDiv.style.textAlign="center";
+        participantDiv.style.backgroundColor="yellow";
+        participantDiv.innerText="yo";
+        participantDiv.setAttribute("id", "yo");
+        container.appendChild(participantDiv);
+
+        const participantDiv2 = document.createElement("div");
+        participantDiv2.style.height="100px";
+        participantDiv2.style.width="100px";
+        participantDiv2.style.margin="1rem";
+        participantDiv2.style.backgroundColor="red";
+        participantDiv2.innerText="yo";
+        participantDiv2.setAttribute("id", "yo2");
+        container.appendChild(participantDiv2);
+    </script>
+</body>
+</html>

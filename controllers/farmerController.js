@@ -42,6 +42,7 @@ module.exports.bookTimeSlot = async (req, res) => {
   );
 
   redis.del(`${farmer._id} appointments`);
+  redis.del(`${farmer._id} results`);
 
   if (mode === "physical") {
     const meet_link = `https://www.google.com/maps?q=${expert.location.coordinates[1]},${expert.location.coordinates[0]}`;
@@ -234,17 +235,29 @@ module.exports.viewResults = async (req, res) => {
   );
 
   //results of previous meetings 
-  const appointments = `SELECT * FROM results_${state} WHERE farmerID='${farmer._id}' ORDER BY book_date DESC`;
-  con.query(appointments, (err, result) => {
-    if(err) console.log("Error finding results for the farmer");
-    for(let i=0;i<result.length;i++){
-      redis.get(`${result[i].expertID}`).then((expert)=>{
-        result[i].expertName=expert;
-        if(i===(result.length-1))
-          return res.json({ results: result });
+
+  redis.get(`${farmer._id} results`).then((data)=>{
+    if(data){
+      res.json({results:JSON.parse(data)});
+    }else{
+      const appointments = `SELECT * FROM results_${state} WHERE farmerID='${farmer._id}' ORDER BY book_date DESC`;
+      con.query(appointments, (err, result) => {
+        if(err) console.log("Error finding results for the farmer");
+        for(let i=0;i<result.length;i++){
+          redis.get(`${result[i].expertID}`).then((expert)=>{
+            result[i].expertName=expert;
+            if(i===(result.length-1)){
+              redis.set(`${farmer._id} results`,JSON.stringify(result)).then((data)=>{
+                console.log(data);
+              });
+              return res.json({ results: result });
+            }
+          });
+        }
       });
     }
   });
+  
 };
 
 
