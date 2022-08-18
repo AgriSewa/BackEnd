@@ -1,5 +1,6 @@
 const Expert=require("../models/Expert");
 const axios=require('axios').default;
+const redis = require("../config/redis");
 
 const con=require("../config/db");
 
@@ -41,6 +42,15 @@ module.exports.submitAdvice = async(req,res) =>{
     const {problem,advice} = req.body;
     const expert = req.user
     const state = await findState(expert.location.coordinates[1],expert.location.coordinates[0]);
+    const sql=`SELECT * FROM results_${state} WHERE id=${resultID}`
+    con.query(sql,(err,result)=>{
+        if(err)
+        return res.json({
+            success: false,
+            message: "Error in saving advice",
+        });
+        redis.del(`${result[0].farmerID} results`);
+    })
 
     submit_advice=`UPDATE results_${state} SET advice='${advice}',problem='${problem}',update_expert=TRUE WHERE id=${resultID}`;
 

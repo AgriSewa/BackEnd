@@ -1,6 +1,7 @@
 const { Storage } = require("@google-cloud/storage");
 const moment = require("moment");
 const axios = require("axios").default;
+const AWS = require('aws-sdk');
 
 const Expert = require("../models/Expert");
 const con = require("../config/db");
@@ -10,12 +11,18 @@ const video = require("../config/video");
 
 const projectId = process.env.projectId;
 let keyFilename = "accesskeys.json";
-const storage = new Storage({
-  projectId,
-  keyFilename,
-});
+// const storage = new Storage({
+//   projectId,
+//   keyFilename,
+// });
+
+const s3=new AWS.S3({
+  accessKeyId: process.env.AWS_ID,
+  secretAccessKey: process.env.AWS_SECRET
+})
 const bucketName = process.env.bucketName;
-const bucket = storage.bucket(bucketName);
+const resultbucketName = process.env.resultbucketName;
+// const bucket = storage.bucket(bucketName);
 
 
 async function findState(lat,long){
@@ -90,13 +97,19 @@ module.exports.uploadFeedback = async (req, res) => {
   const feedbackInt=parseInt(feedback);
   try {
     if (req.file) {
-      const url = `https://storage.googleapis.com/${bucketName}/${req.file.originalname}`;
-      const blob = bucket.file(req.file.originalname);
-      const blobStream = blob.createWriteStream();
-
-      blobStream.on("finish", () => {
-        console.log(url);
-        submit_feedback = `UPDATE results_${state} SET feedback=${feedbackInt},image='${url}',update_farmer=TRUE WHERE id=${resultID}`;
+      redis.del(`${farmer._id} results`);
+      // const url = `https://storage.googleapis.com/${bucketName}/${req.file.originalname}`;
+      // const blob = bucket.file(req.file.originalname);
+      // const blobStream = blob.createWriteStream();
+      const params = {
+        Bucket: resultbucketName,
+        Key: req.file.originalname,
+        Body: req.file.buffer
+      }
+      s3.upload(params, (err,data)=>{
+        if(err)
+          return res.json({success: false, message: "Error in saving feedback"});
+        submit_feedback = `UPDATE results_${state} SET feedback=${feedbackInt},image='${data.Location}',update_farmer=TRUE WHERE id=${resultID}`;
         con.query(submit_feedback, (err, result) => {
           if (err)
             return res.json({
@@ -108,8 +121,11 @@ module.exports.uploadFeedback = async (req, res) => {
             message: "Successfully submitted Feedback",
           });
         });
-      });
-      blobStream.end(req.file.buffer);
+      })
+      // blobStream.on("finish", () => {
+      //   console.log(url);
+      // });
+      // blobStream.end(req.file.buffer);
     } else {
       return res.json({ success: false, message: "Error in saving feedback" });
     }
@@ -210,15 +226,26 @@ module.exports.findSlots=  (date,state,expertID)=>{
 module.exports.uploadImage = async (req, res) => {
   try {
     if (req.file) {
-      const url = `https://storage.googleapis.com/${bucketName}/${req.file.originalname}`;
-      const blob = bucket.file(req.file.originalname);
-      const blobStream = blob.createWriteStream();
+      // const url = `https://storage.googleapis.com/${bucketName}/${req.file.originalname}`;
+      // const blob = bucket.file(req.file.originalname);
+      // const blobStream = blob.createWriteStream();
 
-      blobStream.on("finish", () => {
-        console.log(url);
+      // blobStream.on("finish", () => {
+      //   console.log(url);
+      //   return res.json({success:true});
+      // });
+      // blobStream.end(req.file.buffer);
+      // const ext = req.file.originalname.split(".")[1];
+      const params = {
+        Bucket: bucketName,
+        Key: req.file.originalname,
+        Body: req.file.buffer
+      }
+      s3.upload(params, (err,data)=>{
+        if(err)
+          return res.json({success:false});
         return res.json({success:true});
-      });
-      blobStream.end(req.file.buffer);
+      })
     } else {
         return res.json({success:false});
     }
