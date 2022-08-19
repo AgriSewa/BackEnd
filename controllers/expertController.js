@@ -1,4 +1,5 @@
 const Expert=require("../models/Expert");
+const Farmer=require("../models/Farmer");
 const axios=require('axios').default;
 const redis = require("../config/redis");
 
@@ -25,15 +26,35 @@ module.exports.viewAppointments = async(req,res) => {
         res.send(result);
     });
 }
+module.exports.getFarmerName = async (farmerID)=>{
+    return new Promise((resolve,reject)=>{
+        redis.get(`${farmerID}`).then(async (farmer)=>{
+            if(farmer){
+                resolve(farmer);
+            }else{
+                const farmer = await Farmer.findById(farmerID);
+                redis.set(`${farmerID}`,farmer.username);
+                resolve(farmer.username);
+            }
+        });
+    });
+    
+}
 
 module.exports.viewResults = async(req,res) => {
     const expert = req.user;
     const state=await findState(expert.location.coordinates[1],expert.location.coordinates[0]);
     const sql = `SELECT * FROM results_${state} WHERE expertID='${expert._id}' AND farmerID IS NOT NULL ORDER BY book_date DESC`;
-    con.query(sql,(err,result)=>{
+    con.query(sql,async (err,result)=>{
         if(err)
             console.log("Error finding results for the expert");
-        return res.json({ results: result });
+        
+        for(let i=0;i<result.length;i++){
+            result[i].farmerName = await this.getFarmerName(result[i].farmerID);
+
+            if(i==(result.length-1))
+                return res.json({ results: result }); 
+        }
     });
 }
 

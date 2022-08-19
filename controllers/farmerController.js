@@ -268,9 +268,11 @@ module.exports.viewResults = async (req, res) => {
       res.json({results:JSON.parse(data)});
     }else{
       const appointments = `SELECT * FROM results_${state} WHERE farmerID='${farmer._id}' ORDER BY book_date DESC`;
+      
       con.query(appointments, (err, result) => {
         if(err) console.log("Error finding results for the farmer");
         for(let i=0;i<result.length;i++){
+
           redis.get(`${result[i].expertID}`).then((expert)=>{
             result[i].expertName=expert;
             if(i===(result.length-1)){
@@ -280,6 +282,7 @@ module.exports.viewResults = async (req, res) => {
               return res.json({ results: result });
             }
           });
+
         }
       });
     }
