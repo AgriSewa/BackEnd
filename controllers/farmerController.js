@@ -190,10 +190,6 @@ module.exports.findAllSlots = async (req,res)=>{
       const farmer = req.user;
       const {expertID} = req.params;
       
-      Expert.findById(expertID,{name:1},(err,expert)=>{
-        redis.set(`${expertID}`,expert.name).then((status)=>{console.log(status)});
-      });
-      
       //getting state information from farmer's latitude, longitude
       const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]); 
 
@@ -269,8 +265,11 @@ module.exports.getExpertName = async (expertID)=>{
               resolve(expert.name);
           }
       });
+
   }); 
-}
+};
+  
+
 
 module.exports.viewResults = async (req, res) => {
   const farmer = req.user;
@@ -291,7 +290,7 @@ module.exports.viewResults = async (req, res) => {
         if(err) return res.json({message:"Error finding results for the farmer"});
         if(result.length==0)return res.json({ results: null });
         for(let i=0;i<result.length;i++){
- 
+
           result[i].expertName = await this.getExpertName(result[i].expertID);
           if(i===(result.length-1)){
             redis.set(`${farmer._id} results`,JSON.stringify(result)).then((data)=>{
@@ -299,7 +298,6 @@ module.exports.viewResults = async (req, res) => {
             });
             return res.json({ results: result });
           }
- 
         }
       });
     }

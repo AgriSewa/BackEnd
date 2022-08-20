@@ -14,7 +14,7 @@ module.exports.createTimeSlots=async (date,state,expertID)=>{
         con.query(sql_create_appointmentTable, function (err, result) {
             
             if(err)
-                console.log("Error in creating Appointments table",err);
+                return console.log("Error in creating Appointments table",err);
 
             //create all the time slots for current date
              
@@ -32,10 +32,7 @@ module.exports.createTimeSlots=async (date,state,expertID)=>{
                         //insert into database table
                         con.query(time_slot,(err,res)=>{
                             
-                            //Duplicate Slots for the date
-                            if(err && err.errno===1062)
-                                console.log("Slot already exists");
-                            else if(err)
+                            if(err)
                                 console.log("Error in inserting time slot into db",err);
                             if(i==end_time)
                                 resolve();
@@ -58,25 +55,31 @@ module.exports.createResultsTable = async(date,state,expertID)=>{
         if(err)
             console.log("Error in creating Results table",err);
 
-        //create all the time slots for current date
-        const slots_sql=`SELECT * FROM appointments_${state} WHERE book_date='${date}' AND expertID='${expertID}'`;
-        con.query(slots_sql,(err,result)=>{
+        const slot_exist = `SELECT * FROM results_${state} WHERE book_date='${date}' AND expertID='${expertID}'`;
+        con.query(slot_exist,(err,result)=>{
             if(err)
-                console.log(err);
-            for(let i=0;i<result.length;i++){
-                let slot=result[i];
-                const result_slot=`INSERT INTO results_${state}(id,slotID,expertID,book_date) VALUES(DEFAULT,'${slot.id}','${expertID}','${date}')`;
-                con.query(result_slot,(err,res)=>{
-                    
-                    //Duplicate Slots for the date
-                    if(err && err.errno===1062)
-                        console.log("Slot already exists");
-                    else if(err)
-                        console.log("Error in inserting time slot into db",err);
+                console.log("Error in querying database");
+            if(result.length===0){
+                //create all the time slots for current date
+                const slots_sql=`SELECT * FROM appointments_${state} WHERE book_date='${date}' AND expertID='${expertID}'`;
+                con.query(slots_sql,(err,result)=>{
+                    if(err)
+                        console.log(err);
+                    for(let i=0;i<result.length;i++){
+                        let slot=result[i];
+                        const result_slot=`INSERT INTO results_${state}(id,slotID,expertID,book_date) VALUES(DEFAULT,'${slot.id}','${expertID}','${date}')`;
+                        con.query(result_slot,(err,res)=>{
+                            
+                            //Duplicate Slots for the date
+                            if(err && err.errno===1062);
+                                //console.log("Slot already exists");
+                            else if(err)
+                                console.log("Error in inserting time slot into db",err);
+                        });
+                    }
                 });
             }
         });
-        
 
     });
 }
