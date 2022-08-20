@@ -39,8 +39,7 @@ module.exports.bookTimeSlot = async (req, res) => {
   const { date, time, mode, expertID } = req.params;
   const expert = await Expert.findById(expertID);
   const farmer = req.user;
-  //call the function to fetch link
-  console.log(`${date} ${time} ${mode} ${expertID}`);
+  
   let book_slot;
 
   const state = await findState(
@@ -186,29 +185,33 @@ module.exports.findRating = async (state,expertID)=>{
   });
 }
 module.exports.findAllSlots = async (req,res)=>{
-    const farmer = req.user;
-    const {expertID} = req.params;
-    
-    Expert.findById(expertID,{name:1},(err,expert)=>{
-      redis.set(`${expertID}`,expert.name).then((status)=>{console.log(status)});
-    });
-    
-    //getting state information from farmer's latitude, longitude
-    const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]); 
+    try {
+      const farmer = req.user;
+      const {expertID} = req.params;
+      
+      Expert.findById(expertID,{name:1},(err,expert)=>{
+        redis.set(`${expertID}`,expert.name).then((status)=>{console.log(status)});
+      });
+      
+      //getting state information from farmer's latitude, longitude
+      const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]); 
 
-    const date1=req.body.date1;
-    const date2=req.body.date2;
-    const date3=req.body.date3;
-    const list1=await this.findSlots(date1,state,expertID);
-    const list2=await this.findSlots(date2,state,expertID);
-    const list3=await this.findSlots(date3,state,expertID);
-    const rating=await this.findRating(state,expertID);
-    res.json({list1,list2,list3,rating});
+      const date1=req.body.date1;
+      const date2=req.body.date2;
+      const date3=req.body.date3;
+      const list1=await this.findSlots(date1,state,expertID);
+      const list2=await this.findSlots(date2,state,expertID);
+      const list3=await this.findSlots(date3,state,expertID);
+      const rating=await this.findRating(state,expertID);
+      res.json({list1,list2,list3,rating});
+    } catch (error) {
+      res.json({success:false,message:"Cannot find slots"});
+    }
 }
 
 module.exports.findSlots=  (date,state,expertID)=>{
 
-    return new Promise(async(resolve,reject)=>{
+    return new Promise( async (resolve,reject) => {
         await adminController.createTimeSlots(date,state,expertID);
         adminController.createResultsTable(date,state,expertID);
         // Finding slots of that particular date
@@ -270,7 +273,7 @@ module.exports.viewResults = async (req, res) => {
       const appointments = `SELECT * FROM results_${state} WHERE farmerID='${farmer._id}' ORDER BY book_date DESC`;
       
       con.query(appointments, (err, result) => {
-        if(err) console.log("Error finding results for the farmer");
+        if(err) return res.json({message:"Error finding results for the farmer"});
         for(let i=0;i<result.length;i++){
 
           redis.get(`${result[i].expertID}`).then((expert)=>{

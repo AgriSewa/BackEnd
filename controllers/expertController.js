@@ -17,8 +17,6 @@ module.exports.viewAppointments = async(req,res) => {
     const expert = req.user
     const state=await findState(expert.location.coordinates[1],expert.location.coordinates[0]);
     const today = new Date().toISOString().slice(0, 10);
-    // var date_time = new Date();
-    // const cur_date = date_time.getFullYear()+"-"+date_time.getMonth()+"-"+date_time.getDay();
     const appointments = `SELECT * FROM appointments_${state} WHERE expertID='${expert._id}' AND book_date>='${today}' AND mode IS NOT NULL`;
     con.query(appointments,(err,result)=>{
         if(err)
@@ -59,31 +57,38 @@ module.exports.viewResults = async(req,res) => {
 }
 
 module.exports.submitAdvice = async(req,res) =>{
-    const { resultID } = req.params;
-    const {problem,advice} = req.body;
-    const expert = req.user
-    const state = await findState(expert.location.coordinates[1],expert.location.coordinates[0]);
-    const sql=`SELECT * FROM results_${state} WHERE id=${resultID}`
-    con.query(sql,(err,result)=>{
-        if(err)
+    try {
+        const { resultID } = req.params;
+        const {problem,advice} = req.body;
+        const expert = req.user
+        const state = await findState(expert.location.coordinates[1],expert.location.coordinates[0]);
+        const sql=`SELECT * FROM results_${state} WHERE id=${resultID}`
+        con.query(sql,(err,result)=>{
+            if(err)
+            return res.json({
+                success: false,
+                message: "Error in saving advice",
+            });
+            redis.del(`${result[0].farmerID} results`);
+        })
+
+        submit_advice=`UPDATE results_${state} SET advice='${advice}',problem='${problem}',update_expert=TRUE WHERE id=${resultID}`;
+
+        con.query(submit_advice,(err,result)=>{
+            if(err)
+                return res.json({
+                    success: false,
+                    message: "Error in saving advice",
+                });
+            return res.json({
+                success: true,
+                message: "Successfully submitted Advice",
+            });
+        });
+    } catch (error) {
         return res.json({
             success: false,
             message: "Error in saving advice",
         });
-        redis.del(`${result[0].farmerID} results`);
-    })
-
-    submit_advice=`UPDATE results_${state} SET advice='${advice}',problem='${problem}',update_expert=TRUE WHERE id=${resultID}`;
-
-    con.query(submit_advice,(err,result)=>{
-        if(err)
-        return res.json({
-            success: false,
-            message: "Error in saving advice",
-        });
-        return res.json({
-            success: true,
-            message: "Successfully submitted Advice",
-        });
-    });
+    }
 }

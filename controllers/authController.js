@@ -56,9 +56,9 @@ exports.verifyRegister = async(req, res, next)=>{
             farmer.save();
             return res.json({success:true,message:"Registration Successful"})
         }
-    })}
-    catch(error){
-        next(error)
+    })
+    }catch(error){
+        res.json({success:false,message:"Invalid OTP"});
     }
 }
 
@@ -81,7 +81,7 @@ exports.loginFarmer = async(req, res, next) =>{
         
     }
     catch(error){
-        next(error)
+        res.json({success:false});
     } 
 }
 
@@ -106,14 +106,14 @@ exports.verifyLoginFarmer = async(req, res, next)=>{
         })
     }
     catch(error){
-        next(error)
+        res.json({success:false,message:"Invalid OTP"});
     }
 }
 
 exports.loginExpert = async(req, res, next) =>{
     const {phone} = req.body
     try{
-        const expert = await Expert.find({phone:phone});
+        const expert = await Expert.findOne({phone:phone});
         let ph = parseInt("91"+expert.phone);
  
         //console.log(config.serviceID)
@@ -125,11 +125,11 @@ exports.loginExpert = async(req, res, next) =>{
         })
         .then((data)=>{
             return res.json({success:true})
-        })
+        });
         
     }
     catch(error){
-        next(error)
+        res.json({success:false,message:"Phone not registered!"});
     } 
 }
 
@@ -154,7 +154,7 @@ exports.verifyLoginExpert = async(req, res, next)=>{
         })
     }
     catch(error){
-        next(error)
+        res.json({success:false,message:"Invalid OTP"});
     }
 }
 

@@ -2,7 +2,7 @@ const mongoose=require('mongoose');
 var mysql = require('mysql2');
 
 var con = mysql.createConnection({
-  host: "localhost",
+  host: "34.133.217.8",
   user: "root",
   password: "12345678",
   database:"agrisewa"
