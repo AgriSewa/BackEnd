@@ -170,6 +170,7 @@ module.exports.findNearestExperts = async (req, res) => {
       },
     };
     const result = await Expert.find(options);
+    if(result.length==0)return res.json(null);
     res.json(result);
 };
 
@@ -257,6 +258,20 @@ module.exports.uploadImage = async (req, res) => {
   }
 };
 
+module.exports.getExpertName = async (expertID)=>{
+  return new Promise((resolve,reject)=>{
+      redis.get(`${expertID}`).then(async (expert)=>{
+          if(expert){
+              resolve(expert);
+          }else{
+              const farmer = await Expert.findById(expertID);
+              redis.set(`${expertID}`,expert.name);
+              resolve(expert.name);
+          }
+      });
+  }); 
+}
+
 module.exports.viewResults = async (req, res) => {
   const farmer = req.user;
   const state = await findState(
@@ -270,22 +285,21 @@ module.exports.viewResults = async (req, res) => {
     if(data){
       res.json({results:JSON.parse(data)});
     }else{
-      const appointments = `SELECT * FROM results_${state} WHERE farmerID='${farmer._id}' ORDER BY book_date DESC`;
-      
-      con.query(appointments, (err, result) => {
+      const today = new Date().toISOString().slice(0, 10);
+      const appointments = `SELECT * FROM results_${state} WHERE farmerID='${farmer._id}' AND book_date<='${today}' ORDER BY book_date`;      
+      con.query(appointments, async (err, result) => {
         if(err) return res.json({message:"Error finding results for the farmer"});
+        if(result.length==0)return res.json({ results: null });
         for(let i=0;i<result.length;i++){
-
-          redis.get(`${result[i].expertID}`).then((expert)=>{
-            result[i].expertName=expert;
-            if(i===(result.length-1)){
-              redis.set(`${farmer._id} results`,JSON.stringify(result)).then((data)=>{
-                console.log(data);
-              });
-              return res.json({ results: result });
-            }
-          });
-
+ 
+          result[i].expertName = await this.getExpertName(result[i].expertID);
+          if(i===(result.length-1)){
+            redis.set(`${farmer._id} results`,JSON.stringify(result)).then((data)=>{
+              console.log(data);
+            });
+            return res.json({ results: result });
+          }
+ 
         }
       });
     }
