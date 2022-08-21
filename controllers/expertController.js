@@ -64,22 +64,18 @@ module.exports.submitAdvice = async(req,res) =>{
         const state = await findState(expert.location.coordinates[1],expert.location.coordinates[0]);
         const sql=`SELECT * FROM results_${state} WHERE id=${resultID}`
         con.query(sql,(err,result)=>{
-            if(err)
-            return res.json({
-                success: false,
-                message: "Error in saving advice",
-            });
+            if(err)console.log(err);
             redis.del(`${result[0].farmerID} results`);
         })
 
         submit_advice=`UPDATE results_${state} SET advice='${advice}',problem='${problem}',update_expert=TRUE WHERE id=${resultID}`;
 
         con.query(submit_advice,(err,result)=>{
-            if(err)
+            if(err){console.log(err)
                 return res.json({
                     success: false,
                     message: "Error in saving advice",
-                });
+                });}
             return res.json({
                 success: true,
                 message: "Successfully submitted Advice",

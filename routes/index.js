@@ -38,6 +38,7 @@ router.get('/farmer/upcoming',middleware.getAuthenticatedFarmer,farmerController
 router.post('/feedback/:resultID',middleware.getAuthenticatedFarmer,multer.single("imgfile"),farmerController.uploadFeedback);
 router.get('/set',middleware.getAuthenticatedFarmer,farmerController.setRedis);
 router.get('/get',middleware.getAuthenticatedFarmer,farmerController.getRedis);
+router.post('/AI/result',middleware.getAuthenticatedFarmer,farmerController.updateResult);
 
 //Expert Routes
 router.get('/expert/upcoming',middleware.getAuthenticatedExpert,expertController.viewAppointments);

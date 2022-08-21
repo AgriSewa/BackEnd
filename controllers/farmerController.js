@@ -244,7 +244,7 @@ module.exports.uploadImage = async (req, res) => {
       s3.upload(params, (err,data)=>{
         if(err)
           return res.json({success:false});
-        return res.json({success:true});
+        return res.json({success:true, image:data.Location});
       })
     } else {
         return res.json({success:false});
@@ -256,7 +256,8 @@ module.exports.uploadImage = async (req, res) => {
 
 module.exports.getExpertName = async (expertID)=>{
   return new Promise((resolve,reject)=>{
-      redis.get(`${expertID}`).then(async (expert)=>{
+      if(expertID){
+        redis.get(`${expertID}`).then(async (expert)=>{
           if(expert){
               resolve(expert);
           }else{
@@ -264,8 +265,9 @@ module.exports.getExpertName = async (expertID)=>{
               redis.set(`${expertID}`,expert.name);
               resolve(expert.name);
           }
-      });
-
+        });
+      }
+      else resolve('Artificial Intelligence')
   }); 
 };
   
@@ -304,6 +306,25 @@ module.exports.viewResults = async (req, res) => {
   });
   
 };
+
+module.exports.updateResult=async (req,res)=>{
+  const {problem,advice,image}=req.body;
+  const advic=advice.slice(0,Math.min(advice.length,90));
+  const farmer = req.user;
+  redis.del(`${farmer._id} results`);
+  const state = await findState(
+      farmer.location.coordinates[1],
+      farmer.location.coordinates[0]
+  );
+  const today = new Date().toISOString().slice(0, 10);
+  submit_advice=`INSERT INTO results_${state}(farmerID,problem,advice,image,update_farmer,book_date) VALUES('${farmer._id}','${problem}','${advic}','${image}',TRUE,'${today}');`;
+  con.query(submit_advice,(err,result)=>{
+      if(err){console.log(err);
+          return res.status(500).json({message:"Error in saving feedback"});
+      }
+      return res.json({success:true});
+  });
+}
 
 
 
