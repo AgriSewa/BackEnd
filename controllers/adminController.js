@@ -92,6 +92,19 @@ module.exports.createResultsTable = async(date,state,expertID)=>{
     });
 }
 
+module.exports.createOnlyResultsTable = async(state)=>{
+    return new Promise((resolve,reject)=>{
+        const sql_create_resultTable=`CREATE TABLE IF NOT EXISTS results_${state}(id int primary key auto_increment,slotID int UNIQUE,farmerID varchar(50), expertID varchar(50), image varchar(1000) DEFAULT 'https://thumbs.dreamstime.com/b/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg', book_date date,feedback int,advice varchar(1000) DEFAULT 'Yet to be uploaded',problem varchar(100) DEFAULT 'Yet to be uploaded',update_expert boolean DEFAULT FALSE,update_farmer boolean DEFAULT FALSE)`;
+    
+        con.query(sql_create_resultTable, function (err, result) {
+                
+            if(err)
+                reject(err);
+            resolve();
+        });
+    });
+}
+
 module.exports.createNewExpert=async (req,res)=>{
     const expert=req.body;
     const newExpert=await Expert.create({
@@ -108,15 +121,17 @@ module.exports.createNewExpert=async (req,res)=>{
 
 module.exports.updateResult=async (req,res)=>{
     const {problem,advice,image}=req.body;
-    const farmer = req.user;
-    const state = await findState(
-        farmer.location.coordinates[1],
-        farmer.location.coordinates[0]
-    );
-    submit_advice=`INSERT INTO results_${state}(problem,advice,image) VALUES('${problem}','${advice}','${image}');`;
-    con.query(submit_advice,(err,result)=>{
-        if(err)
-            return res.status(500).json({message:"Error in saving feedback"});
-        res.json({"message":"Successfully submitted Feedback"});
-    });
+    // const farmer = req.user;
+    // const state = await findState(
+    //     farmer.location.coordinates[1],
+    //     farmer.location.coordinates[0]
+    // );
+    console.log(req.body);
+    res.send("yo");
+    // submit_advice=`INSERT INTO results_${state}(problem,advice,image) VALUES('${problem}','${advice}','${image}');`;
+    // con.query(submit_advice,(err,result)=>{
+    //     if(err)
+    //         return res.status(500).json({message:"Error in saving feedback"});
+    //     res.json({"message":"Successfully submitted Feedback"});
+    // });
 }

@@ -1,5 +1,7 @@
 const Expert=require("../models/Expert");
 const Farmer=require("../models/Farmer");
+const Central=require("../models/Central");
+
 const axios=require('axios').default;
 const redis = require("../config/redis");
 
@@ -66,6 +68,14 @@ module.exports.submitAdvice = async(req,res) =>{
         con.query(sql,(err,result)=>{
             if(err)console.log(err);
             redis.del(`${result[0].farmerID} results`);
+            Farmer.findById(result[0].farmerID,{location:1},(err,farmer)=>{
+                Central.create({
+                    location:farmer.location,
+                    problem,
+                    advice,
+                    image:result[0].image
+                });
+            });
         })
 
         submit_advice=`UPDATE results_${state} SET advice='${advice}',problem='${problem}',update_expert=TRUE WHERE id=${resultID}`;

@@ -4,6 +4,7 @@ const axios = require("axios").default;
 const AWS = require('aws-sdk');
 
 const Expert = require("../models/Expert");
+const Central=require("../models/Central");
 const con = require("../config/db");
 const redis = require("../config/redis");
 const adminController = require("./adminController");
@@ -317,12 +318,19 @@ module.exports.updateResult=async (req,res)=>{
       farmer.location.coordinates[0]
   );
   const today = new Date().toISOString().slice(0, 10);
+  await adminController.createOnlyResultsTable(state); 
   submit_advice=`INSERT INTO results_${state}(farmerID,problem,advice,image,update_farmer,book_date) VALUES('${farmer._id}','${problem}','${advic}','${image}',TRUE,'${today}');`;
   con.query(submit_advice,(err,result)=>{
       if(err){console.log(err);
           return res.status(500).json({message:"Error in saving feedback"});
       }
       return res.json({success:true});
+  });
+  Central.create({
+    location:farmer.location,
+    problem,
+    advice,
+    image
   });
 }
 
