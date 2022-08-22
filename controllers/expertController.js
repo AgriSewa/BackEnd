@@ -69,12 +69,13 @@ module.exports.submitAdvice = async(req,res) =>{
             if(err)console.log(err);
             redis.del(`${result[0].farmerID} results`);
             Farmer.findById(result[0].farmerID,{location:1},(err,farmer)=>{
-                Central.create({
-                    location:farmer.location,
-                    problem,
-                    advice,
-                    image:result[0].image
-                });
+                // Central.create({
+                //     location:farmer.location,
+                //     problem,
+                //     advice,
+                //     image:result[0].image
+                // });
+                adminController.addItem(farmer.location, problem, advice, result[0].image);
             });
         })
 

@@ -36,8 +36,6 @@ router.get('/bookslot/:date/:time/:mode/:expertID',middleware.getAuthenticatedFa
 router.get('/farmer/viewResults',middleware.getAuthenticatedFarmer,farmerController.viewResults);
 router.get('/farmer/upcoming',middleware.getAuthenticatedFarmer,farmerController.findAppointments);
 router.post('/feedback/:resultID',middleware.getAuthenticatedFarmer,multer.single("imgfile"),farmerController.uploadFeedback);
-router.get('/set',middleware.getAuthenticatedFarmer,farmerController.setRedis);
-router.get('/get',middleware.getAuthenticatedFarmer,farmerController.getRedis);
 router.post('/AI/result',middleware.getAuthenticatedFarmer,farmerController.updateResult);
 
 //Expert Routes
@@ -53,5 +51,8 @@ router.post("/room/link",video.addEvent);
 
 //AI
 router.post("/result",adminController.updateResult);
+
+//Business
+router.get("/agrisewa/central/repo/data",adminController.getItems);
 
 module.exports = router;

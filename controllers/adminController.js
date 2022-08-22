@@ -1,8 +1,18 @@
 const Expert=require("../models/Expert");
 const con=require("../config/db");
 const scheduler=require("node-cron");
+const AWS = require('aws-sdk');
+const { 
+    v1: uuidv1
+} = require('uuid');
 
 const end_time=17;
+
+const aws_remote_config= {
+    accessKeyId: process.env.AWS_ID,
+    secretAccessKey: process.env.AWS_SECRET,
+    region: process.env.region,
+}
 
 async function findState(lat,long){
     const fetched_data=await axios.get(`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=${long},${lat}`);
@@ -134,4 +144,43 @@ module.exports.updateResult=async (req,res)=>{
     //         return res.status(500).json({message:"Error in saving feedback"});
     //     res.json({"message":"Successfully submitted Feedback"});
     // });
+}
+
+module.exports.addItem = (location, problem, advice, image)=> {
+    AWS.config.update(aws_remote_config);
+    const docClient = new AWS.DynamoDB.DocumentClient();
+    const Item = { location, problem, advice, image };
+    Item.id = uuidv1();
+    var params = {
+        TableName: process.env.awstablename,
+        Item: Item
+    };
+  
+    // Call DynamoDB to add the item to the table
+    docClient.put(params, function (err, data) {
+        if (err) {
+            console.log(err)
+        } else {
+            console.log(data)
+        }
+    });
+}
+
+module.exports.getItems = (req,res)=>{
+    AWS.config.update(aws_remote_config);
+    const docClient = new AWS.DynamoDB.DocumentClient();
+    const params = {
+        TableName: process.env.awstablename
+    };
+
+    docClient.scan(params, function (err, data) {
+        if (err) {
+            res.send(err)
+        } else {
+            const { Items } = data;
+            res.send({
+                Data: Items
+            });
+        }
+    });
 }

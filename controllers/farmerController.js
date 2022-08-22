@@ -326,30 +326,13 @@ module.exports.updateResult=async (req,res)=>{
       }
       return res.json({success:true});
   });
-  Central.create({
-    location:farmer.location,
-    problem,
-    advice,
-    image
-  });
+  adminController.addItem(farmer.location, problem, advice, image);
+  // Central.create({
+  //   location:farmer.location,
+  //   problem,
+  //   advice,
+  //   image
+  // });
 }
 
 
-
-
-
-module.exports.setRedis = async(req,res)=>{
-  const farmer=req.user;
-  const s=JSON.stringify(farmer);
-  redis.set('farmer',s).then((data)=>{
-    console.log(data);
-  });
-}
-
-module.exports.getRedis = async(req,res)=>{
-  redis.get('farmers').then((data)=>{
-    const d=JSON.parse(data);
-    res.send(d);
-    console.log(data);
-  });
-}
