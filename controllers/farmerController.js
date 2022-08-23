@@ -97,7 +97,9 @@ module.exports.uploadFeedback = async (req, res) => {
   const feedbackInt=parseInt(feedback);
   try {
     if (req.file) {
+
       redis.del(`${farmer._id} results`);
+      
       // const url = `https://storage.googleapis.com/${bucketName}/${req.file.originalname}`;
       // const blob = bucket.file(req.file.originalname);
       // const blobStream = blob.createWriteStream();
@@ -186,6 +188,7 @@ module.exports.findRating = async (state,expertID)=>{
       });
   });
 }
+
 module.exports.findAllSlots = async (req,res)=>{
     try {
       const farmer = req.user;
@@ -194,12 +197,11 @@ module.exports.findAllSlots = async (req,res)=>{
       //getting state information from farmer's latitude, longitude
       const state=await findState(farmer.location.coordinates[1],farmer.location.coordinates[0]); 
 
-      const date1=req.body.date1;
-      const date2=req.body.date2;
-      const date3=req.body.date3;
+      const date1=req.body.date1; const date2=req.body.date2; const date3=req.body.date3;
       const list1=await this.findSlots(date1,state,expertID);
       const list2=await this.findSlots(date2,state,expertID);
       const list3=await this.findSlots(date3,state,expertID);
+
       const rating=await this.findRating(state,expertID);
       res.json({list1,list2,list3,rating});
     } catch (error) {
@@ -262,7 +264,7 @@ module.exports.getExpertName = async (expertID)=>{
           if(expert){
               resolve(expert);
           }else{
-              const farmer = await Expert.findById(expertID);
+              const expert = await Expert.findById(expertID);
               redis.set(`${expertID}`,expert.name);
               resolve(expert.name);
           }
@@ -282,7 +284,6 @@ module.exports.viewResults = async (req, res) => {
   );
 
   //results of previous meetings 
-
   redis.get(`${farmer._id} results`).then((data)=>{
     if(data){
       res.json({results:JSON.parse(data)});
@@ -292,16 +293,16 @@ module.exports.viewResults = async (req, res) => {
       con.query(appointments, async (err, result) => {
         if(err) return res.json({message:"Error finding results for the farmer"});
         if(result.length==0)return res.json({ results: null });
+
         for(let i=0;i<result.length;i++){
 
           result[i].expertName = await this.getExpertName(result[i].expertID);
           if(i===(result.length-1)){
-            redis.set(`${farmer._id} results`,JSON.stringify(result)).then((data)=>{
-              console.log(data);
-            });
+            redis.set(`${farmer._id} results`,JSON.stringify(result));
             return res.json({ results: result });
           }
         }
+
       });
     }
   });
@@ -312,7 +313,9 @@ module.exports.updateResult=async (req,res)=>{
   const {problem,advice,image}=req.body;
   const advic=advice.slice(0,Math.min(advice.length,90));
   const farmer = req.user;
+
   redis.del(`${farmer._id} results`);
+  
   const state = await findState(
       farmer.location.coordinates[1],
       farmer.location.coordinates[0]
@@ -327,6 +330,8 @@ module.exports.updateResult=async (req,res)=>{
       return res.json({success:true});
   });
   adminController.addItem(farmer.location, problem, advice, image);
+
+  /* saving to mongo */ 
   // Central.create({
   //   location:farmer.location,
   //   problem,

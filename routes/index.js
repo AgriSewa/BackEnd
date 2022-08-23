@@ -6,7 +6,7 @@ const farmerController = require("../controllers/farmerController");
 const adminController = require("../controllers/adminController");
 const expertController = require("../controllers/expertController");
 const audio = require("../config/audio");
-const video=require("../config/video");
+const video = require("../config/video");
 const middleware = require("../config/middleware");
 const router = express.Router();
 
