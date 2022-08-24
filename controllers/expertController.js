@@ -1,6 +1,7 @@
 const Expert=require("../models/Expert");
 const Farmer=require("../models/Farmer");
 const Central=require("../models/Central");
+const adminController = require("./adminController");
 
 const axios=require('axios').default;
 const redis = require("../config/redis");
@@ -44,17 +45,24 @@ module.exports.getFarmerName = async (farmerID)=>{
 module.exports.viewResults = async(req,res) => {
     const expert = req.user;
     const state=await findState(expert.location.coordinates[1],expert.location.coordinates[0]);
-    const sql = `SELECT * FROM results_${state} WHERE expertID='${expert._id}' AND farmerID IS NOT NULL AND update_expert=0 AND image!='https://thumbs.dreamstime.com/b/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg' ORDER BY book_date`;
+    const sql = `SELECT * FROM results_${state} WHERE expertID='${expert._id}' AND farmerID IS NOT NULL AND update_expert=0 AND update_farmer=1 ORDER BY book_date`;
     con.query(sql,async (err,result)=>{
         if(err)
             console.log("Error finding results for the expert");
         if(result.length==0)return res.json({ results: null });
-        for(let i=0;i<result.length;i++){
-            result[i].farmerName = await this.getFarmerName(result[i].farmerID);
-            if(i==(result.length-1)){
-                return res.json({ results: result }); 
+
+        const sql2 = `SELECT COUNT(*) AS cnt FROM results_${state} WHERE expertID='${expert._id}' AND update_expert=1`;
+        con.query(sql2,async (err,result2)=>{
+            if(err)
+                console.log("Error finding results for the expert");
+            for(let i=0;i<result.length;i++){
+                result[i].farmerName = await this.getFarmerName(result[i].farmerID);
+                if(i==(result.length-1)){
+                    return res.json({ results: result,completed: result2[0].cnt}); 
+                }
             }
-        }
+        });
+        
     });
 }
 
