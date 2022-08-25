@@ -167,20 +167,23 @@ module.exports.addItem = (location, problem, advice, image)=> {
 }
 
 module.exports.getItems = (req,res)=>{
-    AWS.config.update(aws_remote_config);
-    const docClient = new AWS.DynamoDB.DocumentClient();
-    const params = {
-        TableName: process.env.awstablename
-    };
+    return new Promise((resolve,reject)=>{
+        AWS.config.update(aws_remote_config);
+        const docClient = new AWS.DynamoDB.DocumentClient();
+        const params = {
+            TableName: process.env.awstablename
+        };
 
-    docClient.scan(params, function (err, data) {
-        if (err) {
-            res.send(err)
-        } else {
-            const { Items } = data;
-            res.send({
-                Data: Items
-            });
-        }
+        docClient.scan(params, function (err, data) {
+            if (err) {
+                reject(err);
+            } else {
+                const { Items } = data;
+                // res.send({
+                //     Data: Items
+                // });
+                resolve(Items);
+            }
+        });
     });
 }

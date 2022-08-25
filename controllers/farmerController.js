@@ -34,6 +34,13 @@ async function findState(lat,long){
     return state;
 }
 
+async function findDistrict(lat,long){
+  const fetched_data=await axios.get(`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=${long},${lat}`);
+  const location=fetched_data.data.address;
+  let district=location.District;
+  return district;
+}
+
 
 
 module.exports.bookTimeSlot = async (req, res) => {
@@ -322,7 +329,7 @@ module.exports.updateResult=async (req,res)=>{
   );
   const today = new Date().toISOString().slice(0, 10);
   await adminController.createOnlyResultsTable(state); 
-  submit_advice=`INSERT INTO results_${state}(farmerID,problem,advice,image,update_farmer,book_date) VALUES('${farmer._id}','${problem}','${advic}','${image}',TRUE,'${today}');`;
+  submit_advice=`INSERT INTO results_${state}(farmerID,problem,advice,image,update_farmer,update_expert,book_date) VALUES('${farmer._id}','${problem}','${advic}','${image}',TRUE,TRUE,'${today}');`;
   con.query(submit_advice,(err,result)=>{
       if(err){console.log(err);
           return res.status(500).json({message:"Error in saving feedback"});
@@ -338,6 +345,53 @@ module.exports.updateResult=async (req,res)=>{
   //   advice,
   //   image
   // });
+}
+
+module.exports.outbreak= async (req,res)=>{
+  const Items =await adminController.getItems();
+  const farmer=req.user;
+  const district = await findDistrict(
+    farmer.location.coordinates[1],
+    farmer.location.coordinates[0]
+  );
+  var map;
+  redis.del(`outbreak`);
+  redis.hgetall('outbreak',async (err,data)=>{
+    if(data){
+      console.log(data);
+      map=JSON.parse(data)[0];
+    }else{
+      map = new Map();
+      for(let item of Items){
+        const dist=await findDistrict(
+          item.location.coordinates[1],
+          item.location.cooordinates[0]
+        );
+        if(dist===district){
+          const prob = item.problem
+          if(map.has(prob)){
+            map.set(prob,map.get(prob)+1);
+          }
+          else{
+            map.set(prob,1);
+          }
+        }
+      }
+      //redis.set(`outbreak`,JSON.stringify(arr)).then((msg)=>console.log(msg)).catch((err)=>{console.log(err)});
+      redis.hmset('outbreak',map);
+    }
+    let maxi=0;
+    let str="";
+    for(let [key,value] of map.entries()){
+
+      if(value>maxi){
+        maxi=value;
+        str=key;
+      }
+
+    }
+    res.json({outbreak:str});
+  });
 }
 
 
