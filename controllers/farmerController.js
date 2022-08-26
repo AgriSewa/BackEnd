@@ -93,8 +93,8 @@ module.exports.bookTimeSlot = async (req, res) => {
 
   //update into database table
   con.query(book_slot, (err, result) => {
-    if (err) console.log("Error in booking slot", err);
-    res.send("Slot Booking successful!");
+    if (err) return res.send({success:false});
+    res.send({success:true});
   });
 };
 
@@ -416,7 +416,7 @@ module.exports.yield = async(req,res)=>{
 
   console.log(dist);
 
-  con.query(`SELECT State_Name,District_Name,Crop,SUM(Area) as Area ,SUM(Production) as Production FROM mytable GROUP BY State_Name,District_Name,Crop HAVING District_Name='PURULIA'`,(err,result)=>{
+  con.query(`SELECT State_Name,District_Name,Crop,SUM(Area) as Area ,SUM(Production) as Production FROM mytable GROUP BY State_Name,District_Name,Crop HAVING District_Name='HOWRAH'`,(err,result)=>{
     if(err)
     // res.send(result);.
     console.log(err)
