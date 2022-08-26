@@ -2,11 +2,11 @@ const mongoose=require('mongoose');
 var mysql = require('mysql2');
 
 var con = mysql.createConnection({
-  host: "34.133.217.8",
-  // host: 'localhost',
+  //host: "34.133.217.8",
+   host: 'localhost',
   user: "root",
-  password: "12345678",
-  // password: 'skillsinmathematics',
+  //password: "12345678",
+  password: '',
   database:"agrisewa"
 });
 

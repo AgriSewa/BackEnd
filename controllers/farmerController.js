@@ -33,11 +33,17 @@ async function findState(lat,long){
     state=state.replace(" ","");
     return state;
 }
+async function findState2(lat,long){
+    const fetched_data=await axios.get(`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=${long},${lat}`);
+    const location=fetched_data.data.address;
+    let state=location.Region;
+    return state;
+}
 
 async function findDistrict(lat,long){
   const fetched_data=await axios.get(`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=${long},${lat}`);
   const location=fetched_data.data.address;
-  let district=location.District;
+  let district=location.Subregion;
   return district;
 }
 
@@ -395,3 +401,25 @@ module.exports.outbreak= async (req,res)=>{
 }
 
 
+module.exports.yield = async(req,res)=>{
+  const farmer = req.user;
+
+  const state = await findState2(
+      farmer.location.coordinates[1],
+      farmer.location.coordinates[0]
+  );
+
+  const dist = await findDistrict(
+      farmer.location.coordinates[1],
+      farmer.location.coordinates[0]
+  );
+
+  console.log(dist);
+
+  con.query(`SELECT State_Name,District_Name,Crop,SUM(Area) as Area ,SUM(Production) as Production FROM mytable GROUP BY State_Name,District_Name,Crop HAVING District_Name='PURULIA'`,(err,result)=>{
+    if(err)
+    // res.send(result);.
+    console.log(err)
+    res.send(result);
+  });
+}
